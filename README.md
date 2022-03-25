@@ -1,13 +1,10 @@
----
----
 # **Technotes** 
----
 ---
 
 # Configurations
 
 
-#### Configuring VIM according to our needs 
+### Configuring VIM according to our needs 
 Edit or Create ~/.vimrc 
 ```vi
 set number
@@ -20,7 +17,7 @@ set autoindent
 highlight ColorColumn ctermbg=darkgray
 ```
 
-#### Automate git password authentiation
+### Automate git password authentiation
 - On Windows :
     ```sh
     git config --global credential.helper wincred
@@ -34,8 +31,10 @@ highlight ColorColumn ctermbg=darkgray
     ```sh
     git config credential.helper store
     ```
-    
-#### Adding alias to view commit tree of git in CUI (shell/console)
+
+
+### Adding alias to view commit tree of git in CUI (shell/console)
+
 Add following line in git config file i.e. ~/.gitconfig
 ```vi
 [alias]
@@ -46,7 +45,7 @@ Now formatted tree could be seen with following command
 git flog
 ```
 
-#### Setting up rsync to backup data
+### Setting up rsync to backup data
 Create a file /etc/rsyncd.conf
 ```vi
 motd file = /etc/rsyncd.motd
@@ -80,7 +79,7 @@ Above command will sync **/home/afzal** into **/var/backups/afzal/Mon** where "M
 
 Mind giving required previleges to files and directories used in this process
 
-#### Setting static ip in local network
+### Setting static ip in local network
 Check network devices attached
 ```sh
 ifconfig
@@ -88,7 +87,7 @@ ifconfig
 Note configuration of device you want to set for static ip
 Edit **/etc/network/interfaces**
 
-#### Making VirtualBox IP permanent
+### Making VirtualBox IP permanent
 Edit **/etc/network/interfaces**
 ```vi
 auto eth1 # this refers to the Host-only network interface
@@ -97,7 +96,7 @@ address 192.168.56.10 # Arbitrary IP address
 netmask 255.255.255.0
 ```
 
-#### Setting linux to bootup with multicores
+### Setting linux to bootup with multicores
 Edit **/etc/init.d/rc** and replace following line
 ```
 CONCURRENCY=none
@@ -107,7 +106,7 @@ with this
 CONCURRENCY=shell
 ```
 
-#### Speeding up ubuntu boot speed
+### Speeding up ubuntu boot speed
 Reduce the default grub boot time
 ```sh
 sudo vim /etc/default/grub
@@ -131,7 +130,7 @@ RandomizedDelaySec=30min
 
 ---
 # Tasks
-#### Reduce video size
+### Reduce video size
 - Audio
 	- Audio quantity : 1
 	- Codec : MP3 
@@ -164,7 +163,7 @@ ffmpeg -i <inputfile> -acodec mp3 -vcodec h264 -b:a <audio_bitrate> -vf scale=<r
 ffmpeg -i input.mov -acodec mp3 -vcodec h264 -b:a 160k -vf scale=1280:720 output.mp4
 ```
 
-#### Creating ssl certificate / certificate authority / self sign certificate
+### Creating ssl certificate / certificate authority / self sign certificate
 1. Generate private rsa key
     ```sh
     openssl genrsa -aes256 -out server.key 1024
@@ -207,7 +206,7 @@ ffmpeg -i input.mov -acodec mp3 -vcodec h264 -b:a 160k -vf scale=1280:720 output
     [server.p12, p2] -> server.jks
 
 
-#### Verification of keys
+### Verification of keys
 Verify a Private Key
 :   ```sh
     openssl rsa -check -in server.key
@@ -221,7 +220,7 @@ Verify a Private Key Matches a Certificate and CSR
     ```
     If the output of each command is identical there is an extremely high probability that the private key, certificate, and CSR are related.
 
-#### Setup gmail to allow other applications to send mail on your behalf
+### Setup gmail to allow other applications to send mail on your behalf
 
 Visit following links (self explanatory)
 > https://myaccount.google.com/lesssecureapps
@@ -230,34 +229,34 @@ Visit following links (self explanatory)
 Port used to connect with ssl : 465
 Port used to connect with tls : 587
 
-#### Check which port is used by which application
+### Check which port is used by which application
 
 ```sh
 netstat -plntu
 ```
 
 
-#### Install a .deb file from terminal
+### Install a .deb file from terminal
 ```sh
 sudo dpkg -i <PATH_TO_DEB_FILE>
 sudo apt-get -f install
 ```
 
 
-#### Making notify-send work in shell. (To make notify-send work in cron i.e. crontab and ssh)
+### Making notify-send work in shell. (To make notify-send work in cron i.e. crontab and ssh)
 ```sh
 eval "export $(egrep -z DBUS_SESSION_BUS_ADDRESS /proc/$(pgrep -u $LOGNAME gnome-session)/environ)";
 notify-send "TITLE" "YOUR_MESSAGE"
 ```
 
-####  Disable notify-send
+###  Disable notify-send
 ```sh
 mv /usr/share/dbus-1/services/org.freedesktop.Notifications.service /usr/share/dbus-1/services/org.freedesktop.Notifications.service.disabled`
 ```
 
 
 
-#### Adding git with ssh protocol on windows
+### Adding git with ssh protocol on windows
 Open git-bash 
 ```sh
 ssh-keygen
@@ -276,17 +275,17 @@ Close git-bash
 RSA public key of ssh is present in .ssh directory inside %userprofile% 
 
 
-#### Convert openssh private key to pem format
+### Convert openssh private key to pem format
 ```sh
 ssh-keygen -p -N "" -m pem -f /path/to/key
 ```
 
-#### Analyze which service taken how much time during startup or bootup
+### Analyze which service taken how much time during startup or bootup
 ```sh
 systemd-analyze blame
 ```
 
-#### Linux Sending mail from command line
+### Linux Sending mail from command line
 MSMTP (SMTP client)
 :   >(Documentation could be found at http://msmtp.sourceforge.net/doc/msmtp.html)
     
@@ -321,12 +320,12 @@ MSMTP (SMTP client)
 	account default : gmail
 	```
 
-#### Linux fetching mail from command line
+### Linux fetching mail from command line
 fetchmail (remote-mail retrieval and forwarding utility intended to be used over on-demand TCP/IP)
 `... PENDING ...`
 			
 	
-#### Adding ssh client in linux
+### Adding ssh client in linux
 ```sh
 sudo apt-get install openssh-server
 ```
@@ -346,7 +345,7 @@ You can use ssh-keygen to create public private rsa key pair
 
 
 
-#### Forcefully disconnect an ssh client
+### Forcefully disconnect an ssh client
 find process id of ssh for client
 ```sh
 sudo netstat -tnpa | grep ssh
@@ -358,7 +357,7 @@ kill -9 <pid>
 
 
 
-#### Logging ssh session   `Important`
+### Logging ssh session   `Important`
 Download log-session script
 ```sh
 wget http://www.jms1.net/log-session
@@ -383,7 +382,7 @@ command="/usr/local/sbin/log-session" ssh-dss AAAAB3Nz...
 ```
 
 
-#### Securing your password with public key encryption
+### Securing your password with public key encryption
 Securing your password (or anything for the secure transmission of information between parties) with public key encryption
 Install gnupg
 ```sh
@@ -409,7 +408,7 @@ To get public key
 `... PENDING ...`
 	
 	
-#### Downloading entire site with wget
+### Downloading entire site with wget
 ```sh
 wget \
  --recursive \
@@ -423,7 +422,7 @@ wget \
      www.website.org/tutorials/html/
 ```
 
-#### Persist iptables configuration
+### Persist iptables configuration
 install iptables-persistent
 ```sh
 sudo apt-get install iptables-persistent
@@ -433,18 +432,18 @@ save iptables configuration with iptables-persistent
 sudo iptables-persistent save
 ```
 
-#### Setting iptables to redirect port (could be used to set wildfly to get request from 80 port)
+### Setting iptables to redirect port (could be used to set wildfly to get request from 80 port)
 ```sh
 sudo iptables -A PREROUTING -t nat -p tcp --dport 80 -j REDIRECT --to-port 8080
 ```
 
-#### Setting iptables to redirect port on local machine
+### Setting iptables to redirect port on local machine
 ```sh
 sudo iptables -t nat -I OUTPUT -p tcp -o lo --dport 80 -j REDIRECT --to-ports 8080
 ```
 
 	
-#### Get linux distribution information
+### Get linux distribution information
 ```sh
 lsb_release -a
 cat /etc/*-release
@@ -453,21 +452,21 @@ cat /proc/version
 ```
 
 
-#### Compress, zip, extract files directory etc
+### Compress, zip, extract files directory etc
 ```sh
 tar -cvzf <filename_with_.tar.gz_extension> <directory_or_file>
 tar -xvzf <filename_with_.tar.gz_extension> 
 tar -cvzf - <file1> <file2> ... <filen>
 ```
 
-#### Continue last transaction of package manager like apt-get or yum
+### Continue last transaction of package manager like apt-get or yum
 ```sh
 yum-complete-transaction [--cleanup-only] 
 yum history redo last
 ```
 
 
-#### View image from command line
+### View image from command line
 Using caca to view image with characters
 :   ```sh
     sudo apt-get install caca-utils
@@ -480,7 +479,7 @@ Using fbi which will use framebuffer
     fbi <any_image_.jpg>
     ```
 
-#### Creating desktop launcher for an application
+### Creating desktop launcher for an application
 vim /home/$HOME/.local/share/applications/`<application_name>`.desktop
 ```vi
 [Desktop Entry]
@@ -499,7 +498,7 @@ Name[en_US]=<Application Name e.g. Eclipse>
 	
 # Installations
 
-#### Adding new php version in wamp server
+### Adding new php version in wamp server
 	
 1.	create new folder [path-to-wamp]/bin/php/php.#.#.# and copy files here
 2. 	copy following files from older php
@@ -512,7 +511,7 @@ Name[en_US]=<Application Name e.g. Eclipse>
 6.	Use a diff tool to get differences between old php.ini and new one to satisfy all extensions
 
 		
-#### Installing LAMPP
+### Installing LAMPP
 	
 1.	Install apache web server
     ```sh
@@ -539,7 +538,7 @@ Name[en_US]=<Application Name e.g. Eclipse>
 	php5enmod mcrypt
 	```
 
-#### Installing LEMP
+### Installing LEMP
 1.  Install nginx 
     ```sh
     sudo apt-get install nginx
@@ -630,7 +629,7 @@ Name[en_US]=<Application Name e.g. Eclipse>
 	```
 
 	
-#### Installing Composer in Linux
+### Installing Composer in Linux
 1. Download the installer to the current directory
 2. Verify the installer SHA-384 either by below command or cross checking at https://composer.github.io/pubkeys.html
 	php -r "if (hash('SHA384', file_get_contents('composer-setup.php')) === 'fd26ce67e3b237fffd5e5544b45b0d92c41a4afe3e3f778e942e43ce6be197b9cdc7c251dcde6e2a52297ea269370680') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); }"
@@ -641,7 +640,7 @@ Name[en_US]=<Application Name e.g. Eclipse>
 5.	To install composer Globally move the downloaded file to /usr/local/bin/composer
 		mv composer.phar /usr/local/bin/composer
 
-#### Installing Laravel 
+### Installing Laravel 
 On Windows 
 :   ```sh
     composer global require "laravel/installer"
@@ -656,7 +655,7 @@ On Linux using local composer.phar
 
 			
 	
-#### Installing java manually
+### Installing java manually
 Download .tar.gz file (preferred to be downloaded from oracle's site)
 ```sh
 wget  --no-cookies --no-check-certificate --header "Cookie: gpw_e24=http%3A%2F%2Fwww.oracle.com%2F; oraclelicense=accept-securebackup-cookie" <url>
@@ -695,7 +694,7 @@ sudo chmod 755 /etc/profile.d/java.sh
 ```
 
 
-#### Uninstall a package properly on Ubuntu
+### Uninstall a package properly on Ubuntu
 ```sh
 sudo apt-get purge git; 
 sudo apt-get autoremove;
@@ -705,7 +704,7 @@ now delete related files if exist in your home directory
 rm ~/.gitconfig
 ```
 			
-#### Installing postgresql debugger
+### Installing postgresql debugger
 Edit postgresql.conf file present in  c:\program files\postgresql\9.3\data directory
 Un-comment or add this line:
 ```vi
@@ -718,7 +717,7 @@ create extension pldbgapi;
 ```
 		
 
-#### Maven download / install sources and javadocs
+### Maven download / install sources and javadocs
 Download sources
 ```sh
 mvn dependency:sources
@@ -743,12 +742,12 @@ Add plugin in pom.xml
 </plugin>
 ```
 
-#### Maven run a particular class
+### Maven run a particular class
 Directly from command line
 :   ```
-	mvn exec:java -Dexec.mainClass="com.example.Main"
-	mvn exec:java -Dexec.mainClass="com.example.Main" -Dexec.args="arg0 arg1"
-	```
+    mvn exec:java -Dexec.mainClass="com.example.Main"
+    mvn exec:java -Dexec.mainClass="com.example.Main" -Dexec.args="arg0 arg1"
+    ```
 Using plugin
 :   ```pom
 	<plugin>
@@ -773,7 +772,7 @@ Using plugin
 	```
 
 
-#### Mongodb on Ubuntu-16.0
+### Mongodb on Ubuntu-16.0
 *Reference taken from https://www.howtoforge.com/tutorial/install-mongodb-on-ubuntu-16.04*
 Importing key
 ```sh
@@ -805,7 +804,7 @@ composer require mongodb/mongodb
 ```
 
 
-#### Generic runnable/executable file/application as service in ubuntu
+### Generic runnable/executable file/application as service in ubuntu
 Edit /etc/systemd/system/prometheus.service
 ```vi	
 [Unit]
@@ -826,7 +825,7 @@ sudo service prometheus start
 
 # Setup
 		
-#### Disabling lightdm (or other service) 
+### Disabling lightdm (or other service) 
 1. Method 1
 	```sh
     echo manual | sudo tee etc/init.d/lightdm.override
@@ -842,7 +841,7 @@ sudo service prometheus start
     sudo update-grub
     ```
 
-#### Disable ssh login without password
+### Disable ssh login without password
 1.  Edit /etc/ssh/sshd_config and change following settings
     ```vi
 	ChallengeResponseAuthentication no
@@ -853,7 +852,7 @@ sudo service prometheus start
 	sudo /etc/init.d/ssh reload
 	```
 	
-#### Setting git to login wihout password + using ssh in git
+### Setting git to login wihout password + using ssh in git
 Create ssh-key
 ```sh
 ssh-keygen
@@ -948,7 +947,7 @@ Reduce JPEG file size
 :	  jpegoptim
 
 
-#### Delete all idle connections of postgresql
+### Delete all idle connections of postgresql
 ```sql
 SELECT
   DATE_TRUNC('second',NOW()-query_start) AS age,
@@ -961,7 +960,7 @@ ORDER BY
   age DESC;
 ```
 
-#### git autocomplete feature in Mac
+### git autocomplete feature in Mac
 ```sh
 curl https://raw.githubusercontent.com/git/git/master/contrib/completion/git-completion.bash > ~/.git-auto-complete.bash
 source ~/.git-auto-complete.bash
@@ -969,13 +968,13 @@ source ~/.git-auto-complete.bash
 
 
 
-#### Use netcat or nc to execute a command or script remotely
+### Use netcat or nc to execute a command or script remotely
     while true; do if [[ $(nc -lp 1234 2> /dev/null) == 'install' ]]; then ./myexec.sh; fi; done
 
 
 
 
-#### Useful python commands for page number converter
+### Useful python commands for page number converter
 ```python
 ",".join([ str(i) for i in range(1, 102) if int((i + 1) / 2) % 2 != 0])
 ",".join([ str(i) for i in range(1, 102) if int((i + 1) / 2) % 2 == 0])
