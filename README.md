@@ -236,7 +236,6 @@ sudo dpkg -i <PATH_TO_DEB_FILE>
 sudo apt-get -f install
 ```
 
---------------------------
 
 ##### Making notify-send work in shell. (To make notify-send work in cron i.e. crontab and ssh)
 ```sh
@@ -248,6 +247,8 @@ notify-send "TITLE" "YOUR_MESSAGE"
 ```sh
 mv /usr/share/dbus-1/services/org.freedesktop.Notifications.service /usr/share/dbus-1/services/org.freedesktop.Notifications.service.disabled`
 ```
+
+
 
 ##### Adding git with ssh protocol on windows
 Open git-bash 
@@ -267,6 +268,7 @@ rm ~/.bashrc
 Close git-bash
 RSA public key of ssh is present in .ssh directory inside %userprofile% 
 
+
 ##### Convert openssh private key to pem format
 ```sh
 ssh-keygen -p -N "" -m pem -f /path/to/key
@@ -276,7 +278,7 @@ ssh-keygen -p -N "" -m pem -f /path/to/key
 ```sh
 systemd-analyze blame
 ```
-			
+
 ##### Linux Sending mail from command line
 MSMTP (SMTP client)
 :   >(Documentation could be found at http://msmtp.sourceforge.net/doc/msmtp.html)
@@ -314,20 +316,28 @@ MSMTP (SMTP client)
 
 ##### Linux fetching mail from command line
 fetchmail (remote-mail retrieval and forwarding utility intended to be used over on-demand TCP/IP)
-		<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< PENDING
+<<<<<< PENDING >>>>>>>
 			
 	
 ##### Adding ssh client in linux
 ```sh
-		sudo apt-get install openssh-server
+sudo apt-get install openssh-server
 ```
-create file **~/.ssh/authorized_keys** if not exist
+Create a file **~/.ssh/authorized_keys** if not exist
+```sh
+touch ~/.ssh/authorized_keys
+```
 Append your public key in this file
+```sh
+cat rsa_public_key.pub >> ~/.ssh/authorized_keys
+```
 Now you can access this linux from windows by following command
 ```sh
 ssh -i rsa_private_key username@ipaddress
 ```
 You can use ssh-keygen to create public private rsa key pair
+
+
 
 ##### forcefully disconnect an ssh client
 find process id of ssh for client
@@ -339,7 +349,9 @@ kill process
 kill -9 <pid>
 ```
 
-##### Logging ssh session
+
+
+##### **Logging ssh session**   `Important`
 Download log-session script
 ```sh
 wget http://www.jms1.net/log-session
@@ -362,6 +374,9 @@ Edit ~/.ssh/authorized_keys and append following
 command="<location_of_log_session>"
 command="/usr/local/sbin/log-session" ssh-dss AAAAB3Nz...
 ```
+--------------------------
+
+
 
 
 ##### Securing your password (or anything for the secure transmission of information between parties) with public key encryption
@@ -413,12 +428,12 @@ save iptables configuration with iptables-persistent
 sudo iptables-persistent save
 ```
 
-##### setting iptables to redirect port (could be used to set wildfly to get request from 80 port)
+##### Setting iptables to redirect port (could be used to set wildfly to get request from 80 port)
 ```sh
 sudo iptables -A PREROUTING -t nat -p tcp --dport 80 -j REDIRECT --to-port 8080
 ```
 
-##### setting iptables to redirect port on local machine
+##### Setting iptables to redirect port on local machine
 ```sh
 sudo iptables -t nat -I OUTPUT -p tcp -o lo --dport 80 -j REDIRECT --to-ports 8080
 ```
@@ -452,6 +467,7 @@ Using caca to view image with characters
 :   ```sh
     sudo apt-get install caca-utils
     cacaview <any_image_.jpg>
+    ```
 
 Using fbi which will use framebuffer
 : ```sh
@@ -519,7 +535,7 @@ Name[en_US]=<Application Name e.g. Eclipse>
 	```
 
 ##### Installing LEMP
-1.  install nginx 
+1.  Install nginx 
     ```sh
     sudo apt-get install nginx
     ```
@@ -530,34 +546,35 @@ Name[en_US]=<Application Name e.g. Eclipse>
 	3. Change the correct lines in “location ~ \.php$ {“ section
 	    ```vi
 		server {
-				listen   80;
+			listen   80;
 	
-				root /usr/share/nginx/www;
-				index index.php index.html index.htm;
+			root /usr/share/nginx/www;
+			index index.php index.html index.htm;
 
-				server_name example.com;
+			server_name example.com;
 
-				location / {
-						try_files $uri $uri/ /index.html;
-				}
+			location / {
+					try_files $uri $uri/ /index.html;
+			}
 
-				error_page 404 /404.html;
+			error_page 404 /404.html;
 
-				error_page 500 502 503 504 /50x.html;
-				location = /50x.html {
-					  root /usr/share/nginx/www;
-				}
-				
-				# pass the PHP scripts to FastCGI server listening on the php-fpm socket
-				location ~ \.php$ {
-						try_files $uri =404;
-						fastcgi_pass unix:/var/run/php5-fpm.sock;
-						fastcgi_index index.php;
-						fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
-						include fastcgi_params;
-						
-				}
+			error_page 500 502 503 504 /50x.html;
+			location = /50x.html {
+				  root /usr/share/nginx/www;
+			}
+			
+			# pass the PHP scripts to FastCGI server listening on the php-fpm socket
+			location ~ \.php$ {
+					try_files $uri =404;
+					fastcgi_pass unix:/var/run/php5-fpm.sock;
+					fastcgi_index index.php;
+					fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+					include fastcgi_params;
+					
+			}
 		}
+		```
 		
 2.  Install mysql with php-mysql
 	```sh
@@ -572,7 +589,7 @@ Name[en_US]=<Application Name e.g. Eclipse>
 	sudo /usr/bin/mysql_secure_installation
 	```
 	
-3. 	Install php
+3. 	Install PHP
     ```sh
 	sudo apt-get install php5-fpm
 	```
@@ -593,7 +610,7 @@ Name[en_US]=<Application Name e.g. Eclipse>
     sudo service php5-fpm restart
     ```
     
-4. create info.php
+4. Create info.php
     ```sh
 	sudo nano /usr/share/nginx/html/info.php
 	```
@@ -609,7 +626,6 @@ Name[en_US]=<Application Name e.g. Eclipse>
 
 	
 ##### Installing Composer in Linux
-
 1. Download the installer to the current directory
 2. Verify the installer SHA-384 either by below command or cross checking at https://composer.github.io/pubkeys.html
 	php -r "if (hash('SHA384', file_get_contents('composer-setup.php')) === 'fd26ce67e3b237fffd5e5544b45b0d92c41a4afe3e3f778e942e43ce6be197b9cdc7c251dcde6e2a52297ea269370680') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); }"
@@ -622,19 +638,20 @@ Name[en_US]=<Application Name e.g. Eclipse>
 
 ##### Installing Laravel 
 On Windows 
-
-	composer global require "laravel/installer"
-
+:   ```sh
+    composer global require "laravel/installer"
+    ```
 On Linux using local composer.phar
-
+:    ```sh
 	php composer.phar global require "laravel/installer"
+	```
 
 **Plugin to add laravel framework in netbeans**
-	https://github.com/nbphpcouncil/nb-laravel-plugin/releases
+*https://github.com/nbphpcouncil/nb-laravel-plugin/releases*
 
 			
 	
-##### Installing java 
+##### Installing java manually
 Download .tar.gz file (preferred to be downloaded from oracle's site)
 ```sh
 wget  --no-cookies --no-check-certificate --header "Cookie: gpw_e24=http%3A%2F%2Fwww.oracle.com%2F; oraclelicense=accept-securebackup-cookie" <url>
@@ -686,77 +703,105 @@ rm ~/.gitconfig
 ##### Installing postgresql debugger
 Edit postgresql.conf file present in  c:\program files\postgresql\9.3\data directory
 Un-comment or add this line:
-	shared_preload_libraries = '$libdir/plugin_debugger.dll'
+```vi
+shared_preload_libraries = '$libdir/plugin_debugger.dll'
+```
 Restart PostgreSQL server
 In the required database run following command 
-	create extension pldbgapi;
+```sql
+create extension pldbgapi;
+```
 		
 
-	## Maven download / install sources and javadocs
-		download sources
-			mvn dependency:sources
-		download docs
-			mvn dependency:resolve -Dclassifier=javadoc
-		download sources of specific package
-			mvn dependency:sources -DincludeArtifactIds=guava
-		add plugin
-			<plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-eclipse-plugin</artifactId>
-                <configuration>
-                    <downloadSources>true</downloadSources>
-                    <downloadJavadocs>true</downloadJavadocs>
-                </configuration>
-            </plugin>
+##### Maven download / install sources and javadocs
+Download sources
+```sh
+mvn dependency:sources
+```
+Download docs
+```sh
+mvn dependency:resolve -Dclassifier=javadoc
+```
+Download sources of specific package
+```sh
+mvn dependency:sources -DincludeArtifactIds=guava
+```
+Add plugin in pom.xml
+```pom
+<plugin>
+    <groupId>org.apache.maven.plugins</groupId>
+    <artifactId>maven-eclipse-plugin</artifactId>
+    <configuration>
+        <downloadSources>true</downloadSources>
+        <downloadJavadocs>true</downloadJavadocs>
+    </configuration>
+</plugin>
+```
 
-	## Maven run a particular class
-		directly from command line
-			mvn exec:java -Dexec.mainClass="com.example.Main"
-			mvn exec:java -Dexec.mainClass="com.example.Main" -Dexec.args="arg0 arg1"
-		using plugin
-			<plugin>
-			  <groupId>org.codehaus.mojo</groupId>
-			  <artifactId>exec-maven-plugin</artifactId>
-			  <version>1.2.1</version>
-			  <executions>
-				<execution>
-				  <goals>
-					<goal>java</goal>
-				  </goals>
-				</execution>
-			  </executions>
-			  <configuration>
-				<mainClass>com.example.Main</mainClass>
-				<arguments>
-				  <argument>foo</argument>
-				  <argument>bar</argument>
-				</arguments>
-			  </configuration>
-			</plugin>
-
-
-    ## Mongodb on Ubuntu-16.0
-        reference taken from https://www.howtoforge.com/tutorial/install-mongodb-on-ubuntu-16.04/
-		Importing key
-			sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv EA312927
-		Create source list file MongoDB
-			echo "deb http://repo.mongodb.org/apt/ubuntu "$(lsb_release -sc)"/mongodb-org/3.2 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.2.list
-			sudo apt-get install mongodb-org
-		 create a new mongodb systemd service file in the '/lib/systemd/system' directory.
-			cd /lib/systemd/system/
-			vim mongod.service
-		Now update the systemd service with command below:
-			systemctl daemon-reload
-		Start mongodb and add it as service to be started at boot time:
-			systemctl start mongod
-			systemctl enable mongod
-
-		Further to add mongodb in php
-			composer require mongodb/mongodb
+##### Maven run a particular class
+Directly from command line
+:   ```
+	mvn exec:java -Dexec.mainClass="com.example.Main"
+	mvn exec:java -Dexec.mainClass="com.example.Main" -Dexec.args="arg0 arg1"
+	```
+Using plugin
+:   ```pom
+	<plugin>
+	  <groupId>org.codehaus.mojo</groupId>
+	  <artifactId>exec-maven-plugin</artifactId>
+	  <version>1.2.1</version>
+	  <executions>
+		<execution>
+		  <goals>
+			<goal>java</goal>
+		  </goals>
+		</execution>
+	  </executions>
+	  <configuration>
+		<mainClass>com.example.Main</mainClass>
+		<arguments>
+		  <argument>foo</argument>
+		  <argument>bar</argument>
+		</arguments>
+	  </configuration>
+	</plugin>
+	```
 
 
-    ## Generic runnable/executable file/application as service in ubuntu
-    	Edit /etc/systemd/system/prometheus.service
+##### Mongodb on Ubuntu-16.0
+*Reference taken from https://www.howtoforge.com/tutorial/install-mongodb-on-ubuntu-16.04*
+Importing key
+```sh
+sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv EA312927
+```
+Create source list file MongoDB
+```sh
+echo "deb http://repo.mongodb.org/apt/ubuntu "$(lsb_release -sc)"/mongodb-org/3.2 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.2.list
+sudo apt-get install mongodb-org
+```
+Create a new mongodb systemd service file in the '/lib/systemd/system' directory.
+```sh
+cd /lib/systemd/system/
+vim mongod.service
+```
+Now update the systemd service with command below:
+```sh
+systemctl daemon-reload
+```
+Start mongodb and add it as service to be started at boot time:
+```sh
+systemctl start mongod
+systemctl enable mongod
+```
+
+*Further to add mongodb in php*
+```sh
+composer require mongodb/mongodb
+```
+
+
+##### Generic runnable/executable file/application as service in ubuntu
+Edit /etc/systemd/system/prometheus.service
 ```vi	
 [Unit]
 Description=Prometheus Service
@@ -769,38 +814,50 @@ ExecStart=/usr/local/bin/prometheus/prometheus --config.file=/usr/local/bin/prom
 [Install]
 WantedBy=multi-user.target 
 ```
-	sudo service prometheus start	
+```sh
+sudo service prometheus start
+```
 	
 
-# setup
+# Setup
 		
-		Disabling lightdm (or other service) 
-			1. 
-				echo manual | sudo tee etc/init.d/lightdm.override
-				i.e. create <service>.override file to disable it (override it)
-			
-				this method is not working after 14.0
-			
-			3. 
-				edit /etc/default/grub
-				replace 	GRUB_CMDLINE_LINUX_DEFAULT="quiet splash"
-				with		GRUB_CMDLINE_LINUX_DEFAULT="text"
-				sudo update-grub
-		
-		Disable ssh login without password
-			1. 
-				edit /etc/ssh/sshd_config and change following settings
-					ChallengeResponseAuthentication no
-					PasswordAuthentication no
-					UsePAM no
-				sudo /etc/init.d/ssh reload
+##### Disabling lightdm (or other service) 
+1. Method 1
+	```sh
+    echo manual | sudo tee etc/init.d/lightdm.override
+    ```
+	i.e. create <service>.override file to disable it (override it)
+	*This method is not working after 14.0*
 
-		Setting git to login wihout password + using ssh in git
-			Create ssh-key
-				ssh-keygen
-			copy your .pub file in remote git application from where you want to connect
-			Add your private key using ssh-agent into your system (if you don't want to provide key every time)
-				ssh-add ~/.ssh/id_rsa
+2. Method 2 
+	edit /etc/default/grub
+	replace 	GRUB_CMDLINE_LINUX_DEFAULT="quiet splash"
+	with		GRUB_CMDLINE_LINUX_DEFAULT="text"
+	```sh
+    sudo update-grub
+    ```
+
+##### Disable ssh login without password
+1.  Edit /etc/ssh/sshd_config and change following settings
+    ```vi
+	ChallengeResponseAuthentication no
+	PasswordAuthentication no
+	UsePAM no
+	```
+	```sh
+	sudo /etc/init.d/ssh reload
+	```
+	
+##### Setting git to login wihout password + using ssh in git
+Create ssh-key
+```sh
+ssh-keygen
+```
+Copy your .pub file in remote git application from where you want to connect
+Add your private key using ssh-agent into your system (if you don't want to provide key every time)
+```sh
+ssh-add ~/.ssh/id_rsa
+```
 	
 	
 	
