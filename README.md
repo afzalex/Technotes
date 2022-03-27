@@ -1,6 +1,3 @@
-# **Technotes** 
----
-
 # Configurations
 
 
