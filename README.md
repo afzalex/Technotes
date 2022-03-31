@@ -991,5 +991,37 @@ source ~/.git-auto-complete.bash
 * Location to install your own sh files so that it could be used as commands **/usr/local/bin/**
  
 
+# Code
+
+### Bash code to auto reload file and trigger some command
+```bash
+#!/bin/sh
+
+FILE="/root/default.conf"
+COPYLOC="/etc/nginx/http.d/default.conf"
+
+cp -f $FILE $COPYLOC
+LT=`stat -c %Z $FILE`; 
+while true
+do 
+    AT=`stat -c %Z $FILE`
+    if [[ "$AT"  != "$LT" ]]; then 
+        cp -f $FILE $COPYLOC
+        sleep 1
+        nginx -s reload
+        LT=$AT
+        echo `date "+%Y/%m/%d %H:%m:%S"` [reloader] Default config file reloaded
+    fi
+    sleep 1
+done
+```
+
+### Python code for page number converter
+```python
+",".join([ str(i) for i in range(1, 102) if int((i + 1) / 2) % 2 != 0])
+",".join([ str(i) for i in range(1, 102) if int((i + 1) / 2) % 2 == 0])
+```
+
+
 ---
 [Edit Technotes](https://github.com/afzalex/technotes/edit/main/README.md)
