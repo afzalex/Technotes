@@ -492,7 +492,7 @@ Icon=<icon location e.g. /home/${USERNAME}/applications/eclipse/icon.xpm>
 Name[en_US]=<Application Name e.g. Eclipse>
 ```
             
-	
+--- 
 # Installations
 
 ### Adding new php version in wamp server
@@ -819,7 +819,7 @@ WantedBy=multi-user.target
 sudo service prometheus start
 ```
 	
-
+---
 # Setup
 		
 ### Disabling lightdm (or other service) 
@@ -861,7 +861,7 @@ ssh-add ~/.ssh/id_rsa
 ```
 	
 	
-	
+---
 # Useful commands
 
 Getting list of installed packages
@@ -977,6 +977,8 @@ source ~/.git-auto-complete.bash
 ",".join([ str(i) for i in range(1, 102) if int((i + 1) / 2) % 2 == 0])
 ```
 
+
+---
 # Informations
 * In virtualbox guest 10.0.2.2 will be the IP of host
 * Accessing guest from host in virtualbox
@@ -991,6 +993,8 @@ source ~/.git-auto-complete.bash
 * Location to install your own sh files so that it could be used as commands **/usr/local/bin/**
  
 
+
+---
 # Code
 
 ### Bash code to auto reload file and trigger some command
