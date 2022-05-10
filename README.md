@@ -42,6 +42,13 @@ Now formatted tree could be seen with following command
 git flog
 ```
 
+**OR**  
+
+Now formatted tree could be seen with following command
+```sh
+curl https://www.afzalex.com/scripts/install-flog.sh | /bin/bash
+```
+
 ### Setting up rsync to backup data
 Create a file /etc/rsyncd.conf
 ```vi
