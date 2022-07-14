@@ -1,6 +1,23 @@
 # Configurations
 
 
+### Enable docker remote API
+```bash
+sudo vim /lib/systemd/system/docker.service
+```
+now search following line
+
+    ExecStart=/usr/bin/dockerd -H fd:// --containerd=/run/containerd/containerd.sock
+and modify it to add `-H tcp://0.0.0.0:2375`
+
+    ExecStart=/usr/bin/dockerd -H fd:// -H tcp://0.0.0.0:2375 --containerd=/run/containerd/containerd.sock
+now reload docker daemon
+```bash
+sudo systemctl daemon-reload
+sudo systemctl restart docker
+```
+
+
 ### Configuring VIM according to our needs 
 Edit or Create ~/.vimrc 
 ```vi
@@ -129,8 +146,8 @@ OnUnitActiveSec=1d
 AccuracySec=1h
 RandomizedDelaySec=30min
 ```
-
-
+<br>
+<br>
 
 ---
 # Tasks
@@ -498,7 +515,9 @@ StartupNotify=true
 Icon=<icon location e.g. /home/${USERNAME}/applications/eclipse/icon.xpm>
 Name[en_US]=<Application Name e.g. Eclipse>
 ```
-            
+<br>
+<br>
+
 --- 
 # Installations
 
@@ -825,7 +844,9 @@ WantedBy=multi-user.target
 ```sh
 sudo service prometheus start
 ```
-	
+<br>
+<br>
+
 ---
 # Setup
 		
@@ -866,8 +887,9 @@ Add your private key using ssh-agent into your system (if you don't want to prov
 ```sh
 ssh-add ~/.ssh/id_rsa
 ```
-	
-	
+<br>
+<br>
+
 ---
 # Useful commands
 
@@ -876,11 +898,13 @@ Getting list of installed packages
     dpkg --get-selections | grep -v deinstall
     ```
 
+<br>
 Copying files from one machine to other 
 :   ```sh
     scp /file_in_current_system root@target_machine /path_of_destination
     ```
 
+<br>
 Getting information of current distribution
 :   ```sh
     uname -r
@@ -889,15 +913,19 @@ Getting information of current distribution
 	cat /proc/version
 	```
 
+<br>
 Download content
 :	  curl
-		
+
+<br>		
 Download file
 :	  wget
 
+<br>
 json formatter with stream
 :	  jq
 
+<br>
 Generic syntax highlighter
 :	```sh
     pygmentize -l xml
@@ -905,51 +933,74 @@ Generic syntax highlighter
 	sudo apt-get install python-image
 	```
 
+<br>
 Formatter for xml
 :   ```sh
     sudo apt-get install libxml2-utils			
 	xmllint
 	```
 
+<br>
 Get info of ip addresses in network (computer name, logged in user etc..)
 :   ```sh
     sudo apt-get install nbtscan		
 	nbtscan 192.168.1.0/24
 	```
 
+<br>
 Network scanner. (find hosts systems and open ports on systems.)
 :   ```sh
     sudo apt-get install nmap
 	nmap <ip-address>
 	```
 
+<br>
 Arbitrary TCP and UDP connections and listens 
 :	  nc
 
+<br>
 To record voice 
 :	  avconv -f pulse -i default file.wav
 
+<br>
 To edit sam file
 :	  chntpw
 
+<br>
 To get mouse coordinates, open windows etc
 :	  xdotool
 
+<br>
 Controlling audio devices
 :   ```sh
     amixer -D pulse sset Master 5%+
 	alsamixer
 	```
+	<br>
+	If amixer is not found, install it using below command
+	```sh
+	sudo apt-get install alsa-utils
+	```
 
+<br>
 Control menubar time format or modify anyway
 :	gsettings set com.canonical.indicator.datetime show-seconds  true
 
+<br>
 Remove/Delete file completely (permanently)
 :	  shred -zun3 -f <file name>
 
+<br>
 Reduce JPEG file size
 :	  jpegoptim
 
+<br>
+Create Conda Environment
+:     ```sh
+      conda create --name email-sending-env python=3.7
+	  ```
+
+<br>
 
 ### Delete all idle connections of postgresql
 ```sql
@@ -983,7 +1034,8 @@ source ~/.git-auto-complete.bash
 ",".join([ str(i) for i in range(1, 102) if int((i + 1) / 2) % 2 != 0])
 ",".join([ str(i) for i in range(1, 102) if int((i + 1) / 2) % 2 == 0])
 ```
-
+<br>
+<br>
 
 ---
 # Informations
@@ -998,8 +1050,8 @@ source ~/.git-auto-complete.bash
     crontab -e
     ```
 * Location to install your own sh files so that it could be used as commands **/usr/local/bin/**
- 
-
+<br>
+<br>
 
 ---
 # Code
@@ -1032,7 +1084,8 @@ done
 ",".join([ str(i) for i in range(1, 102) if int((i + 1) / 2) % 2 != 0])
 ",".join([ str(i) for i in range(1, 102) if int((i + 1) / 2) % 2 == 0])
 ```
-
+<br>
+<br>
 
 ---
 [Edit Technotes](https://github.com/afzalex/technotes/edit/main/README.md)
