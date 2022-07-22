@@ -156,6 +156,10 @@ RandomizedDelaySec=30min
 ```bash
 ffmpeg -i video.mp4 -i audio.wav -c:v copy -c:a aac -map 0:v:0 -map 1:a:0 output.mp4
 ```
+with video re-encoding
+```bash
+ffmpeg -i video.mp4 -i audio.wav -c:v libx264 -c:a aac -map 0:v:0 -map 1:a:0 output.mp4
+```
 
 ### Reduce video size
 - Audio
@@ -1118,4 +1122,4 @@ with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
 <br>
 
 ---
-[Edit Technotes](https://github.com/afzalex/technotes/edit/main/README.md)
+[Edit Technotes](https://github.com/afzalex/technotes/edit/main/README.md) | v2
