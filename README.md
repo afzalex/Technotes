@@ -1,4 +1,34 @@
+# Technical Notes by **Afzal**
+Server Setup Repository : https://github.com/afzalex/serversetup.git
+About Repository : https://github.com/afzalex/about.git
+
 # Configurations
+
+
+### EC2 user-data to add web server with web page on 80 port number
+```bash
+#!/usr/bin/env bash
+su ec2-user
+sudo yum install httpd -y
+sudo service httpd start
+
+cat <<EOF | tee /tmp/index.html
+<html>
+    <head>
+        <title> In the Pale Moonlight</title>
+        <style>
+            html, body { background: #000; padding: 0; margin: 0; }
+            img { display: block; margin: 0px auto; }
+        </style>
+    </head>
+    <body>
+        <img src='https://c.tenor.com/ITctI_ZpHIoAAAAM/brain-linux.gif' height='100%' />
+    </body>
+</html>
+EOF
+
+sudo mv /tmp/index.html /var/www/html/index.html
+```
 
 
 ### Enable docker remote API
@@ -151,6 +181,51 @@ RandomizedDelaySec=30min
 
 ---
 # Tasks
+
+### View CSV file in terminal
+To use below solution, nodejs is required.
+```bash
+npm i -g tty-table
+cat data.csv | tty-table
+```
+
+
+### Replace part of text file with content from another file
+Consider following textual file `test_bash_file.sh`
+```sh
+#!/bin/bash
+echo "Hello World"
+
+#MANAGED_BLOCK_START
+#Please don't modify this text, it is managed by replacement script
+echo "This is the content to be replaced"
+#MANAGED_BLOCK_END
+
+echo "above content should be managed via replacement script"
+```
+And another textual file `test_scriptlet.dat` whose content is to be substituted in `test_bash_file.sh`
+```bash
+#Please don't modify this text, it is managed by replacement script
+echo "Replaced Text"
+echo "This is the content from replacement script"
+```
+Run following command to replace part of text file `test_bash_file.sh` with `test_scriptlet.dat`
+```bash
+awk '
+    BEGIN       {p=1}
+    /^#MANAGED_BLOCK_START/   {print;system("cat  test_scriptlet.dat");p=0}
+    /^#MANAGED_BLOCK_END/     {p=1}
+    p' test_bash_file.sh
+```
+
+To replace text and substitute environment variables in replaced text
+```bash
+awk '
+    BEGIN       {p=1}
+    /^#MANAGED_BLOCK_START/   {print;system("cat  test_scriptlet.dat  | envsubst");p=0}
+    /^#MANAGED_BLOCK_END/     {p=1}
+    p' test_bash_file.sh
+```
 
 ### Merge audio from different video to other video file
 ```bash
@@ -530,6 +605,12 @@ Name[en_US]=<Application Name e.g. Eclipse>
 
 --- 
 # Installations
+
+### Installation scripts to setup environment 
+alpine setup environment
+```sh
+<<<<<<<<<<<<<<<<<<<<<<<<
+```
 
 ### Adding new php version in wamp server
 	
