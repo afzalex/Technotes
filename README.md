@@ -1,6 +1,12 @@
-# Technical Notes by **Afzal**
-Server Setup Repository : https://github.com/afzalex/serversetup.git
-About Repository : https://github.com/afzalex/about.git
+# Technical Notes by **Afzal**   
+
+|  |  |
+| ------ | ------ |
+| Server Setup Repository | [https://github.com/afzalex/serversetup.git][https://github.com/afzalex/serversetup.git] |
+| About Repository | [https://github.com/afzalex/about.git][https://github.com/afzalex/about.git] |
+
+
+
 
 # Configurations
 
@@ -181,6 +187,56 @@ RandomizedDelaySec=30min
 
 ---
 # Tasks
+
+### Check disk or usb or mounted device performance
+To check which device is mounted use `findmnt`   
+Then use `hdparm` to check performance
+```sh
+findmnt
+hdparm -Tt /dev/mmcblk0p2
+```
+Above command should be run with sudo user
+
+
+Other way to check performance is to use fio
+```sh
+sudo apt-get install fio
+mkdir fiotest
+fio --name=write_throughput --directory=fiotest --numjobs=8 --size=10M --time_based --runtime=60s --ramp_time=2s --ioengine=libaio --direct=1 --verify=0 --bs=1M --iodepth=64 --rw=write --group_reporting=1
+```
+*https://cloud.google.com/compute/docs/disks/benchmarking-pd-performance*
+
+### Check temperature 
+```sh
+cat /sys/class/thermal/thermal_zone*/type
+```
+The output shows the CPU temperature in the five-digit format. Here, 49000 means 49C.
+
+### Change default format of docker ls or docker ps
+```sh
+mkdir -p ~/.docker
+cat <<EOF > ~/.docker/config.json
+{
+	"psFormat": "table {{.ID}}\t{{.Names}}\t{{.Image}}\t{{.Status}}\t{{printf \"%.60s\" .Ports}}"
+}
+EOF
+
+```
+Install important libraries
+```
+apt-get update
+apt-get install -y iputils-ping
+```
+
+### Run debian command via docker
+```sh
+docker run -v "$PWD:/root" -w/root --rm -it --entrypoint bash debian:stable-slim
+```
+Install important libraries
+```
+apt-get update
+apt-get install -y iputils-ping
+```
 
 ### View CSV file in terminal
 To use below solution, nodejs is required.
@@ -984,6 +1040,25 @@ ssh-add ~/.ssh/id_rsa
 ---
 # Useful commands
 
+List all apt-get packages versions or list current version of package
+:   ```sh
+	apt-get policy nodejs
+    apt-get madison nodejs
+    ```
+
+<br>
+Check boot performance | boot services time analysis
+:   ```sh
+    systemd-analyze blame
+    ```
+
+<br>
+Check systemctl service dependency tree
+:   ```sh
+    systemctl list-dependencies --reverse snapd.socket
+    ```
+
+<br>
 Getting list of installed packages
 :   ```sh
     dpkg --get-selections | grep -v deinstall
@@ -1141,13 +1216,15 @@ source ~/.git-auto-complete.bash
     crontab -e
     ```
 * Location to install your own sh files so that it could be used as commands **/usr/local/bin/**
+* Location to get information of ifconfig or current network or eth&ast; or to get mac addresses is **/sys/class/net/*/address
+
 <br>
 <br>
 
 ---
 # Code
 
-### Bash code to auto reload file and trigger some command
+### Trigger code on file change
 ```bash
 #!/bin/sh
 
@@ -1202,5 +1279,47 @@ with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
 <br>
 <br>
 
+
+### Intercept requests of XMLHttpRequest
+```javascript
+window.fzinterceptor = {
+	predicate: url => (/\/followers\/\?count=/i).test(url),
+	collectorInitializer: () => []
+};
+fzinterceptor.collector = fzinterceptor.collectorInitializer()
+fzinterceptor.renewCollector = function(newCollector) {
+	const oldCollector = fzinterceptor.collector
+	if (!newCollector) {
+		newCollector = fzinterceptor.collectorInitializer()
+	}
+	fzinterceptor.collector = newCollector
+	return oldCollector;
+}
+fzinterceptor.executor = (data, collector, url, postData) => {
+    console.log(url + " : " + postData)
+    console.log(data)
+    return [...collector, ...data.users]
+}
+(function(xhr, fzinterceptor) {
+    const XHR = XMLHttpRequest.prototype;
+    const send = XHR.send;
+    XHR.send = function(postData) {
+        this.addEventListener('load', function() {
+			if (fzinterceptor.predicate(this.responseURL)) {
+            	const data = JSON.parse(this.responseText)
+				const returned = fzinterceptor.executor(data, fzinterceptor.collector, this.responseURL, postData)
+				if (returned) {
+					fzinterceptor.collector = returned
+				}
+			}
+        });
+        return send.apply(this, arguments);
+    };
+})(XMLHttpRequest, fzinterceptor);
+```
+
 ---
 [Edit Technotes](https://github.com/afzalex/technotes/edit/main/README.md) | v2
+
+
+
