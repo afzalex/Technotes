@@ -2,8 +2,8 @@
 
 |  |  |
 | ------ | ------ |
-| Server Setup Repository | [https://github.com/afzalex/serversetup.git][https://github.com/afzalex/serversetup.git] |
-| About Repository | [https://github.com/afzalex/about.git][https://github.com/afzalex/about.git] |
+| Server Setup Repository | [https://github.com/afzalex/serversetup.git](https://github.com/afzalex/serversetup.git) |
+| About Repository | [https://github.com/afzalex/about.git](https://github.com/afzalex/about.git) |
 
 
 
