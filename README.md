@@ -6,6 +6,7 @@
 | About Repository | [https://github.com/afzalex/about.git](https://github.com/afzalex/about.git) |
 
 
+---
 
 
 # Configurations
@@ -1223,6 +1224,19 @@ source ~/.git-auto-complete.bash
 
 ---
 # Code
+
+### To read .env file to set environment variables
+```bash
+environmentSetupFile=$(mktemp)
+if [ -f '.env' ]; then 
+    cat '.env' | while read line; do echo "export $line"; done > "${environmentSetupFile}"
+    source "${environmentSetupFile}"
+    rm -f "${environmentSetupFile}"
+else 
+    echo '>> .env not found'
+    exit 1
+fi
+```
 
 ### Trigger code on file change
 ```bash
