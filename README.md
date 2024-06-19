@@ -1,9 +1,10 @@
 # Technical Notes by **Afzal**   
 
-|  |  |
-| ------ | ------ |
+|                         |  |
+|-------------------------| ------ |
 | Server Setup Repository | [https://github.com/afzalex/serversetup.git](https://github.com/afzalex/serversetup.git) |
-| About Repository | [https://github.com/afzalex/about.git](https://github.com/afzalex/about.git) |
+| About Repository        | [https://github.com/afzalex/about.git](https://github.com/afzalex/about.git) |
+| fzbox.local RootCA      | [Download](assets/rootCA.crt) |
 
 
 ---
@@ -1218,6 +1219,8 @@ source ~/.git-auto-complete.bash
     ```
 * Location to install your own sh files so that it could be used as commands **/usr/local/bin/**
 * Location to get information of ifconfig or current network or eth&ast; or to get mac addresses is **/sys/class/net/*/address
+
+* Personal RootCA Certificate :  [Download](assets/rootCA.crt)
 
 <br>
 <br>
