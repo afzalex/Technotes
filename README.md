@@ -1219,6 +1219,8 @@ source ~/.git-auto-complete.bash
 * Location to install your own sh files so that it could be used as commands **/usr/local/bin/**
 * Location to get information of ifconfig or current network or eth&ast; or to get mac addresses is **/sys/class/net/*/address
 
+* Personal RootCA Certificate :  [Download](assets/rootCA.crt)
+
 <br>
 <br>
 
