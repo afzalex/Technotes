@@ -7,6 +7,70 @@
 | fzbox.local RootCA      | [Download](assets/rootCA.crt) |
 
 
+
+
+# Table of Contents
+
+- [Configurations](#configurations) - System and Service Setup
+  - [EC2 Web Server](#ec2-user-data-to-add-web-server-with-web-page-on-80-port-number) - Deploy Apache + custom landing page via user-data
+  - [Docker Remote API](#enable-docker-remote-api) - Configure Docker daemon for remote management on port 2375
+  - [VIM Settings](#configuring-vim-according-to-our-needs) - Productivity-focused VIM configuration (line numbers, indentation, colors)
+  - [Git Credentials](#automate-git-password-authentiation) - Secure credential storage for Windows/Linux
+  - [Chrome Command](#adding-personalized-fz-chrome-google-chrome-command-for-windows) - Manage multiple Chrome profiles via command line (fz-chrome)
+  - [Git Log Tree](#adding-flog-alias-to-view-commit-tree-of-git-in-cui-shellconsole) - Beautiful Git history visualization (flog)
+  - [Rsync Backup](#setting-up-rsync-to-backup-data) - Automated daily backups with logging
+  - [Network Config](#setting-static-ip-in-local-network) - Configure permanent IP addresses
+  - [VirtualBox Network](#making-virtualbox-ip-permanent) - Static IP configuration for VirtualBox VMs
+  - [Linux Boot](#setting-linux-to-bootup-with-multicores) - Enable multicore support during boot
+  - [Ubuntu Performance](#speeding-up-ubuntu-boot-speed) - Reduce GRUB timeout and optimize services
+
+- [Tasks](#tasks) - Common System Administration Tasks
+  - [Storage Performance](#check-disk-or-usb-or-mounted-device-performance) - Benchmark storage devices with hdparm/fio
+  - [System Temperature](#check-temperature) - Monitor CPU and system temperatures
+  - [Docker Output](#change-default-format-of-docker-ls-or-docker-ps) - Customize docker ps/ls output format
+  - [Debian Container](#run-debian-command-via-docker) - Run Debian commands in isolated container
+  - [Terminal CSV](#view-csv-file-in-terminal) - View CSV files using tty-table
+  - [File Content Management](#replace-part-of-text-file-with-content-from-another-file) - Advanced text manipulation with awk
+  - [Video Processing](#merge-audio-from-different-video-to-other-video-file) - Merge audio/video streams with ffmpeg
+  - [Video Compression](#reduce-video-size) - Optimize video files while maintaining quality
+  - [SSL/TLS](#creating-ssl-certificate--certificate-authority--self-sign-certificate) - Generate and manage SSL certificates
+  - [Email Setup](#setup-gmail-to-allow-other-applications-to-send-mail-on-your-behalf) - Configure Gmail for application access
+  - [Port Management](#check-which-port-is-used-by-which-application) - Monitor and manage port usage
+  - [Package Installation](#install-a-deb-file-from-terminal) - Install .deb packages from command line
+  - [System Notifications](#making-notify-send-work-in-shell-to-make-notify-send-work-in-cron-ie-crontab-and-ssh) - Configure desktop notifications
+
+- [Installations](#installations) - Software Installation Guides
+  - [Environment Setup](#installation-scripts-to-setup-environment) - Complete Alpine Linux environment setup
+  - [WAMP PHP](#adding-new-php-version-in-wamp-server) - Add/manage PHP versions in WAMP
+  - [LAMPP Stack](#installing-lampp) - Complete Linux web server stack with Apache
+  - [LEMP Stack](#installing-lemp) - Complete Linux web server stack with Nginx
+  - [Composer](#installing-composer-in-linux) - PHP dependency management tool
+  - [Laravel](#installing-laravel) - Modern PHP framework installation
+  - [Java Environment](#installing-java-manually) - Custom Java installation with environment setup
+  - [Ubuntu Packages](#uninstall-a-package-properly-on-ubuntu) - Clean package removal and management
+  - [PostgreSQL Tools](#installing-postgresql-debugger) - Database debugging tools
+  - [Maven Dependencies](#maven-download--install-sources-and-javadocs) - Java build tool configuration
+  - [MongoDB Setup](#mongodb-on-ubuntu-160) - Complete MongoDB installation on Ubuntu
+  - [System Services](#generic-runnableexecutable-fileapplication-as-service-in-ubuntu) - Create custom system services
+
+- [Setup](#setup) - Security and Access Configuration
+  - [Service Control](#disabling-lightdm-or-other-service) - Enable/disable system services
+  - [SSH Configuration](#disable-ssh-login-without-password) - Secure SSH with key-based authentication
+  - [Git SSH Access](#setting-git-to-login-wihout-password--using-ssh-in-git) - Configure SSH keys for Git
+
+- [Useful Commands](#useful-commands) - Essential command-line tools and shortcuts
+
+- [Information](#informations) - System administration reference notes
+
+- [Code](#code) - Useful Code Snippets
+  - [Environment Setup](#to-read-env-file-to-set-environment-variables) - Parse and load .env files
+  - [File Monitoring](#trigger-code-on-file-change) - Watch and react to file changes
+  - [Python Email](#python-code-to-send-a-simple-text-email) - Simple email sending script
+  - [Number Processing](#python-code-for-page-number-converter) - Page number manipulation utilities
+  - [AJAX Debugging](#intercept-requests-of-xmlhttprequest) - Monitor and debug AJAX requests
+
+
+
 ---
 
 
@@ -86,7 +150,7 @@ highlight ColorColumn ctermbg=darkgray
 
 
 
-### Adding personalized google chrome command for Windows
+### Adding personalized fz-chrome google chrome command for Windows
 
 To make this alias persistent across cmd sessions, you can add the doskey command to your AutoRun key in the Windows registry:
 
@@ -104,7 +168,7 @@ To make this alias persistent across cmd sessions, you can add the doskey comman
 
 
 
-### Adding alias to view commit tree of git in CUI (shell/console)
+### Adding flog alias to view commit tree of git in CUI (shell/console)
 
 Add following line in git config file i.e. ~/.gitconfig
 ```vi
