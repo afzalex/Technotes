@@ -150,21 +150,46 @@ highlight ColorColumn ctermbg=darkgray
 
 
 
-### Adding personalized fz-chrome google chrome command for Windows
+### Adding personalized fz-chrome google chrome command
+
+#### For Windows:
 
 To make this alias persistent across cmd sessions, you can add the doskey command to your AutoRun key in the Windows registry:
 
 1. Open Registry Editor (regedit)
 2. Navigate to: `HKEY_CURRENT_USER\Software\Microsoft\Command Processor`
 3. If the AutoRun key does not exist, create a new **String Value** named `AutoRun`
-
 4. Set its value to:
-	```cmd
-	doskey fz-chrome="C:\Program Files\Google\Chrome\Application\chrome.exe" --user-data-dir="%USERPROFILE%\.fz-chrome\$1"
-	```
-	Now, the alias will be available every time you open cmd.
+    ```cmd
+    doskey fz-chrome="C:\Program Files\Google\Chrome\Application\chrome.exe" --user-data-dir="%USERPROFILE%\.fz-chrome\$1"
+    ```
+    Now, the alias will be available every time you open cmd.
 
-5. This will allow you to type fz-chrome user1 to launch Chrome with the user data directory at %USERPROFILE%\.fz-chrome\user1.
+5. This will allow you to type `fz-chrome user1` to launch Chrome with the user data directory at `%USERPROFILE%\.fz-chrome\user1`.
+
+#### For Linux:
+
+1. Add the function to your .bashrc:
+    ```bash
+    cat << 'EOF' >> ~/.bashrc
+    
+    # Launch Chrome with separate profile directories
+    fz-chrome() {
+        if [ -z "$1" ]; then
+            echo "Usage: fz-chrome <profile-name>"
+            return 1
+        fi
+        google-chrome --user-data-dir="$HOME/.fz-chrome/$1"
+    }
+    EOF
+    ```
+
+2. Reload your .bashrc:
+    ```bash
+    source ~/.bashrc
+    ```
+
+3. Now you can use `fz-chrome user1` to launch Chrome with a profile stored at `~/.fz-chrome/user1`
 
 
 
@@ -802,7 +827,7 @@ alpine setup environment
 	(If /usr/share/nginx/www does not exist, it's probably called html. Make sure you update your configuration appropriately)
 	1. Add index.php to the index line.
 	2. Change the server_name from local host to your domain name or IP address (replace the example.com in the configuration)
-	3. Change the correct lines in “location ~ \.php$ {“ section
+	3. Change the correct lines in "location ~ \.php$ {“ section
 	    ```vi
 		server {
 			listen   80;
@@ -1264,9 +1289,7 @@ FROM
 WHERE NOW() - query_start > '00:10:00'
 ORDER BY
   age DESC;
-```
-
-### git autocomplete feature in Mac
+```### git autocomplete feature in Mac
 ```sh
 curl https://raw.githubusercontent.com/git/git/master/contrib/completion/git-completion.bash > ~/.git-auto-complete.bash
 source ~/.git-auto-complete.bash
@@ -1420,6 +1443,8 @@ fzinterceptor.executor = (data, collector, url, postData) => {
 
 ---
 [Edit Technotes](https://github.com/afzalex/technotes/edit/main/README.md) | v2
+
+
 
 
 
