@@ -5,6 +5,7 @@
 | Server Setup Repository | [https://github.com/afzalex/serversetup.git](https://github.com/afzalex/serversetup.git) |
 | About Repository        | [https://github.com/afzalex/about.git](https://github.com/afzalex/about.git) |
 | fzbox.local RootCA      | [Download](assets/rootCA.crt) |
+| Ubuntu Setup Guide      | [Setup Guide](UBUNTU_SETUP_GUIDE.md) |
 
 
 
