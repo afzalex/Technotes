@@ -4,9 +4,8 @@
 1. [Essential Tools](#1-essential-tools)
 2. [Development Environment](#2-development-environment)
 3. [Programming Languages](#3-programming-languages)
-4. [Development Tools](#4-development-tools)
-5. [Media Tools](#5-media-tools)
-6. [Additional Software](#6-additional-software)
+4. [Media Tools](#4-media-tools)
+5. [Additional Software](#5-additional-software)
 
 ## 1. Essential Tools
 
@@ -39,7 +38,7 @@ git config --global user.name "Afzal Sheikh"
 ### Docker
 
 1. Install Docker Engine
-   - Follow the official installation guide: https://docs.docker.com/engine/install/ubuntu/#install-using-the-repository
+   - Follow the official installation guide: [https://docs.docker.com/engine/install/ubuntu/#install-using-the-repository](https://docs.docker.com/engine/install/ubuntu/#install-using-the-repository)
 
 2. Add your user to the docker group:
 ```bash
@@ -48,7 +47,7 @@ newgrp docker
 ```
 
 3. Optional: Install Docker Desktop
-   - Download from: https://docs.docker.com/desktop/setup/install/linux/ubuntu/#install-docker-desktop
+   - Download from: [https://docs.docker.com/desktop/setup/install/linux/ubuntu/#install-docker-desktop](https://docs.docker.com/desktop/setup/install/linux/ubuntu/#install-docker-desktop)
    - Setup Docker Desktop login:
 ```bash
 gpg --generate-key
@@ -58,11 +57,11 @@ pass init <your_generated_gpg-id_public_key>
 ### IDEs and Editors
 
 #### Visual Studio Code
-1. Download VS Code from https://code.visualstudio.com/download
+1. Download VS Code from [https://code.visualstudio.com/download](https://code.visualstudio.com/download)
 2. Install recommended extensions for your development needs
 
 #### IntelliJ IDEA
-1. Download Community Edition from https://www.jetbrains.com/idea/download/?section=linux
+1. Download Community Edition from [https://www.jetbrains.com/idea/download/?section=linux](https://www.jetbrains.com/idea/download/?section=linux)
 
 2. Extract and install:
 ```bash
@@ -75,7 +74,7 @@ sudo mv idea-IC* /opt/idea
 
 #### Cursor IDE
 
-1. Download Cursor from https://www.cursor.com/
+1. Download Cursor from [https://www.cursor.com/](https://www.cursor.com/)
 
 2. Install the AppImage:
 ```bash
@@ -110,7 +109,7 @@ sudo chmod 4755 /opt/cursor/chrome-sandbox
 #### Android Studio
 
 1. Download and install Android Studio
-   - Follow the installation guide: https://developer.android.com/studio/install#linux
+   - Follow the installation guide: [https://developer.android.com/studio/install#linux](https://developer.android.com/studio/install#linux)
 
 2. Set environment variables:
 ```bash
@@ -164,8 +163,8 @@ sudo update-alternatives --config java
 
 ### Python (Miniconda)
 
-1. Download Miniconda from https://repo.anaconda.com/miniconda/
-   - For Python 3.10: https://repo.anaconda.com/miniconda/Miniconda3-py310_24.7.1-0-Linux-x86_64.sh
+1. Download Miniconda from [https://repo.anaconda.com/miniconda/](https://repo.anaconda.com/miniconda/)
+   - For Python 3.10: [https://repo.anaconda.com/miniconda/Miniconda3-py310_24.7.1-0-Linux-x86_64.sh](https://repo.anaconda.com/miniconda/Miniconda3-py310_24.7.1-0-Linux-x86_64.sh)
 
 2. Install Miniconda:
 ```bash
@@ -173,57 +172,13 @@ chmod +x Miniconda3-py310_*.sh
 ./Miniconda3-py310_*.sh
 ```
 
-## 4. Development Tools
-
-### Android Development
-
-#### Android Studio
-
-1. Download and install Android Studio
-   - Follow the installation guide: https://developer.android.com/studio/install#linux
-
-2. Set environment variables:
-```bash
-cat << EOF >> ~/.bashrc
-# Android SDK environment variables
-export ANDROID_HOME=\$HOME/Android/Sdk
-export PATH=\$PATH:\$ANDROID_HOME/emulator
-export PATH=\$PATH:\$ANDROID_HOME/tools
-export PATH=\$PATH:\$ANDROID_HOME/tools/bin
-export PATH=\$PATH:\$ANDROID_HOME/platform-tools
-EOF
-```
-
-3. Create desktop entry through IDE: Tools > Create Desktop Entry
-
-#### Flutter
-
-1. Install required dependencies:
-```bash
-sudo apt update && sudo apt install clang cmake ninja-build pkg-config libgtk-3-dev -y
-```
-
-2. Set environment variables:
-```bash
-cat << EOF >> ~/.bashrc
-# Flutter SDK path
-export PATH=\$PATH:/home/afzal/Android/flutter/bin
-export PATH=\$PATH:/home/afzal/Android/
-EOF
-```
-
-3. Verify the installation:
-```bash
-flutter doctor
-```
-
-## 5. Media Tools
+## 4. Media Tools
 
 ### Graphics Applications
 
 #### Blender
 
-1. Download Blender from https://www.blender.org/download/
+1. Download Blender from [https://www.blender.org/download/](https://www.blender.org/download/)
 
 2. Extract and install:
 ```bash
@@ -249,7 +204,7 @@ sudo update-desktop-database
 
 #### GIMP
 
-1. Download GIMP flatpakref from https://www.gimp.org/downloads/
+1. Download GIMP flatpakref from [https://www.gimp.org/downloads/](https://www.gimp.org/downloads/)
 
 2. Install Flatpak and GIMP:
 ```bash
@@ -277,7 +232,7 @@ sudo update-desktop-database
 
 #### OBS Studio
 
-1. For detailed installation instructions, visit https://obsproject.com/download
+1. For detailed installation instructions, visit [https://obsproject.com/download](https://obsproject.com/download)
 
 2. Install OBS Studio and dependencies:
 ```bash
@@ -292,7 +247,7 @@ Note: These commands are for Ubuntu 24.04 and newer. For other installation meth
 
 #### qBittorrent
 
-1. Download AppImage from https://www.qbittorrent.org/download
+1. Download AppImage from [https://www.qbittorrent.org/download](https://www.qbittorrent.org/download)
 
 2. Install the AppImage:
 ```bash
@@ -317,20 +272,20 @@ sudo chmod +x /usr/share/applications/qbittorrent.desktop
 sudo update-desktop-database
 ```
 
-## 6. Additional Software
+## 5. Additional Software
 
 ### Web Browsers
-- Google Chrome: https://www.google.com/intl/en_in/chrome/
+- Google Chrome: [https://www.google.com/intl/en_in/chrome/](https://www.google.com/intl/en_in/chrome/)
 
 ### Document Tools
-- Adobe Acrobat Reader
+- Adobe Acrobat Reader: [https://get.adobe.com/reader/](https://get.adobe.com/reader/)
 
 ### Development Tools
-- Postman: API Testing Tool
-- Shotcut: Video Editor (Download Linux portable tar from https://www.shotcut.org/download/)
+- Postman: [https://www.postman.com/downloads/](https://www.postman.com/downloads/)
+- Shotcut: [https://www.shotcut.org/download/](https://www.shotcut.org/download/)
 
 ### Media
-- YouTube Music Desktop App
+- YouTube Music Desktop App: [https://github.com/th-ch/youtube-music/releases](https://github.com/th-ch/youtube-music/releases)
 
 ### Notes
 - After installing applications, you may need to log out and log back in for some changes to take effect
