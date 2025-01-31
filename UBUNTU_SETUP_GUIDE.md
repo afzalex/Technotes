@@ -159,6 +159,31 @@
    flutter doctor
    ```
 
+### Postman
+
+1. Download from [https://www.postman.com/downloads/](https://www.postman.com/downloads/)
+
+2. Extract and install:
+```bash
+tar -xzvf postman-linux-x64.tar.gz
+sudo mv Postman/app /opt/postman
+```
+
+3. Create desktop entry:
+```bash
+sudo bash -c 'cat << EOF > /usr/share/applications/postman.desktop
+[Desktop Entry]
+Name=Postman
+Exec=/opt/postman/Postman
+Icon=/opt/postman/icons/icon_128x128.png
+Type=Application
+Categories=Development;Utility;
+Terminal=false
+EOF'
+sudo chmod +x /usr/share/applications/postman.desktop
+sudo update-desktop-database
+```
+
 ## 3. Programming Languages
 
 ### Node.js and NPM
@@ -185,7 +210,7 @@
    sudo apt-get install openjdk-17-jdk -y
    sudo update-alternatives --config java
    ```
-
+   
 ### Python (Miniconda)
 
 1. Download Miniconda from [https://repo.anaconda.com/miniconda/](https://repo.anaconda.com/miniconda/)
@@ -306,7 +331,7 @@ Note: These commands are for Ubuntu 24.04 and newer. For other installation meth
 - Adobe Acrobat Reader: [https://get.adobe.com/reader/](https://get.adobe.com/reader/)
 
 ### Development Tools
-- Postman: [https://www.postman.com/downloads/](https://www.postman.com/downloads/)
+
 - Shotcut: [https://www.shotcut.org/download/](https://www.shotcut.org/download/)
 
 ### Media
