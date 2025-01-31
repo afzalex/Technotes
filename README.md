@@ -17,13 +17,14 @@
   - [Docker Remote API](#enable-docker-remote-api) - Configure Docker daemon for remote management on port 2375
   - [VIM Settings](#configuring-vim-according-to-our-needs) - Productivity-focused VIM configuration (line numbers, indentation, colors)
   - [Git Credentials](#automate-git-password-authentiation) - Secure credential storage for Windows/Linux
-  - [Chrome Command](#adding-personalized-fz-chrome-google-chrome-command-for-windows) - Manage multiple Chrome profiles via command line (fz-chrome)
+  - [Chrome Command](#adding-personalized-fzchrome-google-chrome-command) - Manage multiple Chrome profiles via command line (fzchrome)
   - [Git Log Tree](#adding-flog-alias-to-view-commit-tree-of-git-in-cui-shellconsole) - Beautiful Git history visualization (flog)
   - [Rsync Backup](#setting-up-rsync-to-backup-data) - Automated daily backups with logging
   - [Network Config](#setting-static-ip-in-local-network) - Configure permanent IP addresses
   - [VirtualBox Network](#making-virtualbox-ip-permanent) - Static IP configuration for VirtualBox VMs
   - [Linux Boot](#setting-linux-to-bootup-with-multicores) - Enable multicore support during boot
   - [Ubuntu Performance](#speeding-up-ubuntu-boot-speed) - Reduce GRUB timeout and optimize services
+  - [iPhone Control](#open-pc-with-iphone-siri-command) - Control PC using iPhone Siri commands
 
 - [Tasks](#tasks) - Common System Administration Tasks
   - [Storage Performance](#check-disk-or-usb-or-mounted-device-performance) - Benchmark storage devices with hdparm/fio
@@ -151,7 +152,7 @@ highlight ColorColumn ctermbg=darkgray
 
 
 
-### Adding personalized fz-chrome google chrome command
+### Adding personalized fzchrome google chrome command
 
 #### For Windows:
 
@@ -162,11 +163,11 @@ To make this alias persistent across cmd sessions, you can add the doskey comman
 3. If the AutoRun key does not exist, create a new **String Value** named `AutoRun`
 4. Set its value to:
     ```cmd
-    doskey fz-chrome="C:\Program Files\Google\Chrome\Application\chrome.exe" --user-data-dir="%USERPROFILE%\.fz-chrome\$1"
+    doskey fzchrome="C:\Program Files\Google\Chrome\Application\chrome.exe" --user-data-dir="%USERPROFILE%\.fzchrome\$1"
     ```
     Now, the alias will be available every time you open cmd.
 
-5. This will allow you to type `fz-chrome user1` to launch Chrome with the user data directory at `%USERPROFILE%\.fz-chrome\user1`.
+5. This will allow you to type `fzchrome user1` to launch Chrome with the user data directory at `%USERPROFILE%\.fzchrome\user1`.
 
 #### For Linux:
 
@@ -175,12 +176,12 @@ To make this alias persistent across cmd sessions, you can add the doskey comman
     cat << 'EOF' >> ~/.bashrc
     
     # Launch Chrome with separate profile directories
-    fz-chrome() {
+    fzchrome() {
         if [ -z "$1" ]; then
-            echo "Usage: fz-chrome <profile-name>"
+            echo "Usage: fzchrome <profile-name>"
             return 1
         fi
-        google-chrome --user-data-dir="$HOME/.fz-chrome/$1"
+        google-chrome --user-data-dir="$HOME/.fzchrome/$1"
     }
     EOF
     ```
@@ -190,7 +191,7 @@ To make this alias persistent across cmd sessions, you can add the doskey comman
     source ~/.bashrc
     ```
 
-3. Now you can use `fz-chrome user1` to launch Chrome with a profile stored at `~/.fz-chrome/user1`
+3. Now you can use `fzchrome user1` to launch Chrome with a profile stored at `~/.fzchrome/user1`
 
 
 
@@ -295,6 +296,52 @@ RandomizedDelaySec=30min
 ```
 <br>
 <br>
+
+### Open PC with iPhone Siri command (Ubuntu)
+
+1. Ubuntu with Wayland session
+2. SSH server must be installed and running:
+   ```bash
+   sudo apt install openssh-server
+   sudo systemctl enable ssh
+   sudo systemctl start ssh
+   ```
+
+3. Create a script file:
+    ```bash
+    mkdir -p ~/.local/bin
+    cat << 'EOF' > ~/.local/bin/login_wayland_with_ssh.sh
+    #!/bin/bash
+
+    # Find all active sessions
+    SESSIONS=$(loginctl list-sessions --no-legend | awk '{print $1}')
+
+    # Loop through sessions to find a Wayland session
+    for SESSION_ID in $SESSIONS; do
+        SESSION_TYPE=$(loginctl show-session "$SESSION_ID" -p Type --value)
+        
+        if [[ "$SESSION_TYPE" == "wayland" ]]; then
+            USER=$(loginctl show-session "$SESSION_ID" -p Name --value)
+            
+            loginctl unlock-session $SESSION_ID
+
+            echo "Logged in"
+            exit 0
+        fi
+    done
+
+    echo "No active session found."
+    exit 1
+    EOF
+
+    chmod +x ~/.local/bin/login_wayland_with_ssh.sh
+    ```
+
+4. Install the iPhone shortcut by opening this link from your iPhone:
+   [https://www.icloud.com/shortcuts/26592a8d14af4f88bf59e73321a56b9a](https://www.icloud.com/shortcuts/26592a8d14af4f88bf59e73321a56b9a)
+
+This setup allows you to unlock your Ubuntu PC using Siri commands from your iPhone.
+
 
 ---
 # Tasks
@@ -868,11 +915,11 @@ alpine setup environment
 	Activate mysql
 	```sh
 	sudo mysql_install_db
-	```
+    ```
 	setup script
 	```sh
 	sudo /usr/bin/mysql_secure_installation
-	```
+    ```
 	
 3. 	Install PHP
     ```sh
@@ -1290,162 +1337,4 @@ FROM
 WHERE NOW() - query_start > '00:10:00'
 ORDER BY
   age DESC;
-```### git autocomplete feature in Mac
-```sh
-curl https://raw.githubusercontent.com/git/git/master/contrib/completion/git-completion.bash > ~/.git-auto-complete.bash
-source ~/.git-auto-complete.bash
 ```
-
-
-
-### Use netcat or nc to execute a command or script remotely
-    while true; do if [[ $(nc -lp 1234 2> /dev/null) == 'install' ]]; then ./myexec.sh; fi; done
-
-
-
-
-### Useful python commands for page number converter
-```python
-",".join([ str(i) for i in range(1, 102) if int((i + 1) / 2) % 2 != 0])
-",".join([ str(i) for i in range(1, 102) if int((i + 1) / 2) % 2 == 0])
-```
-<br>
-<br>
-
----
-# Informations
-* In virtualbox guest 10.0.2.2 will be the IP of host
-* Accessing guest from host in virtualbox
-*  In virtual box   settings > Network > Attached to : NAT
-   1. In virtual box   settings > Network > Attached to : NAT
-   2. In guest type ifconfig
-* In Ubuntu the packages installed are stored in /var/cache/apt/archives
-* Crontab could be used to schedule tasks in linux. Command to edit crontab is
-    ```sh
-    crontab -e
-    ```
-* Location to install your own sh files so that it could be used as commands **/usr/local/bin/**
-* Location to get information of ifconfig or current network or eth&ast; or to get mac addresses is **/sys/class/net/*/address
-
-* Personal RootCA Certificate :  [Download](assets/rootCA.crt)
-
-<br>
-<br>
-
----
-# Code
-
-### To read .env file to set environment variables
-```bash
-environmentSetupFile=$(mktemp)
-if [ -f '.env' ]; then 
-    cat '.env' | while read line; do echo "export $line"; done > "${environmentSetupFile}"
-    source "${environmentSetupFile}"
-    rm -f "${environmentSetupFile}"
-else 
-    echo '>> .env not found'
-    exit 1
-fi
-```
-
-### Trigger code on file change
-```bash
-#!/bin/sh
-
-FILE="/root/default.conf"
-COPYLOC="/etc/nginx/http.d/default.conf"
-
-cp -f $FILE $COPYLOC
-LT=`stat -c %Z $FILE`; 
-while true
-do 
-    AT=`stat -c %Z $FILE`
-    if [[ "$AT"  != "$LT" ]]; then 
-        cp -f $FILE $COPYLOC
-        sleep 1
-        nginx -s reload
-        LT=$AT
-        echo `date "+%Y/%m/%d %H:%m:%S"` [reloader] Default config file reloaded
-    fi
-    sleep 1
-done
-```
-
-
-### Python code to send a simple text email
-```python
-import smtplib, ssl
-from getpass import getpass
-
-port = 465  # For SSL
-smtp_server = "smtp.gmail.com"
-sender_email = "afzalex.store@gmail.com"  # Enter your address
-receiver_email = "afzalex.testing@gmail.com"  # Enter receiver address
-password = getpass("Type your password and press enter: ")
-message = """\
-Subject: Hi there
-
-This message is sent from Python.
-"""
-
-context = ssl.create_default_context()
-with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
-    server.login(sender_email, password)
-    server.sendmail(sender_email, receiver_email, message)
-```
-
-
-### Python code for page number converter
-```python
-",".join([ str(i) for i in range(1, 102) if int((i + 1) / 2) % 2 != 0])
-",".join([ str(i) for i in range(1, 102) if int((i + 1) / 2) % 2 == 0])
-```
-<br>
-<br>
-
-
-### Intercept requests of XMLHttpRequest
-```javascript
-window.fzinterceptor = {
-	predicate: url => (/\/followers\/\?count=/i).test(url),
-	collectorInitializer: () => []
-};
-fzinterceptor.collector = fzinterceptor.collectorInitializer()
-fzinterceptor.renewCollector = function(newCollector) {
-	const oldCollector = fzinterceptor.collector
-	if (!newCollector) {
-		newCollector = fzinterceptor.collectorInitializer()
-	}
-	fzinterceptor.collector = newCollector
-	return oldCollector;
-}
-fzinterceptor.executor = (data, collector, url, postData) => {
-    console.log(url + " : " + postData)
-    console.log(data)
-    return [...collector, ...data.users]
-}
-(function(xhr, fzinterceptor) {
-    const XHR = XMLHttpRequest.prototype;
-    const send = XHR.send;
-    XHR.send = function(postData) {
-        this.addEventListener('load', function() {
-			if (fzinterceptor.predicate(this.responseURL)) {
-            	const data = JSON.parse(this.responseText)
-				const returned = fzinterceptor.executor(data, fzinterceptor.collector, this.responseURL, postData)
-				if (returned) {
-					fzinterceptor.collector = returned
-				}
-			}
-        });
-        return send.apply(this, arguments);
-    };
-})(XMLHttpRequest, fzinterceptor);
-```
-
----
-[Edit Technotes](https://github.com/afzalex/technotes/edit/main/README.md) | v2
-
-
-
-
-
