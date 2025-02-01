@@ -66,6 +66,18 @@
 
    This will set the DOCKER_HOST environment variable to use the Unix socket directly. 
 
+   This happens because of different context of docker, that could be seen by running `docker context ls`.
+   
+   If you don't want to change back the DOCKER_HOST, you will have to start docker desktop on login. Which could be done by following:
+   1. Open Startup Applications (gnome-session-properties)
+   2. Click Add
+   3. Enter:
+      ```
+      Name: Docker Desktop
+      Command: /usr/bin/docker-desktop
+      Comment: Start Docker Desktop on boot
+      ```
+   4. Save and reboot
 
 ### IDEs and Editors
 
@@ -277,6 +289,15 @@ sudo update-desktop-database
    sudo chmod +x /usr/share/applications/gimp.desktop
    sudo update-desktop-database
    ```
+
+4. Optional: Enable terminal command access
+   ```bash
+   sudo ln -s /var/lib/flatpak/exports/bin/org.gimp.GIMP /usr/local/bin/gimp
+   # Add this line if you see IBus warnings and don't need IBus input methods
+   echo 'export GTK_IM_MODULE=xim' >> ~/.bashrc
+   ```
+
+   This allows you to launch GIMP by typing `gimp` in terminal. The second command prevents GTK warnings by switching to XIM input method, but skip it if you use IBus for typing in other languages.
 
 ### Video Tools
 

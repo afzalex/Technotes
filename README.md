@@ -59,6 +59,7 @@
   - [Service Control](#disabling-lightdm-or-other-service) - Enable/disable system services
   - [SSH Configuration](#disable-ssh-login-without-password) - Secure SSH with key-based authentication
   - [Git SSH Access](#setting-git-to-login-wihout-password--using-ssh-in-git) - Configure SSH keys for Git
+  - [Windows Git SSH](#adding-git-with-ssh-protocol-on-windows) - Setup SSH for Git on Windows
 
 - [Useful Commands](#useful-commands) - Essential command-line tools and shortcuts
 
@@ -875,7 +876,7 @@ alpine setup environment
 	(If /usr/share/nginx/www does not exist, it's probably called html. Make sure you update your configuration appropriately)
 	1. Add index.php to the index line.
 	2. Change the server_name from local host to your domain name or IP address (replace the example.com in the configuration)
-	3. Change the correct lines in "location ~ \.php$ {“ section
+	3. Change the correct lines in "location ~ \.php$ {" section
 	    ```vi
 		server {
 			listen   80;
@@ -1195,146 +1196,7196 @@ ssh-add ~/.ssh/id_rsa
 <br>
 <br>
 
----
-# Useful commands
-
-List all apt-get packages versions or list current version of package
-:   ```sh
-	apt-get policy nodejs
-    apt-get madison nodejs
-    ```
-
-<br>
-Check boot performance | boot services time analysis
-:   ```sh
-    systemd-analyze blame
-    ```
-
-<br>
-Check systemctl service dependency tree
-:   ```sh
-    systemctl list-dependencies --reverse snapd.socket
-    ```
-
-<br>
-Getting list of installed packages
-:   ```sh
-    dpkg --get-selections | grep -v deinstall
-    ```
-
-<br>
-Copying files from one machine to other 
-:   ```sh
-    scp /file_in_current_system root@target_machine /path_of_destination
-    ```
-
-<br>
-Getting information of current distribution
-:   ```sh
-    uname -r
-	cat /etc/*-release
-	lsb_release -a
-	cat /proc/version
-	```
-
-<br>
-Download content
-:	  curl
-
-<br>		
-Download file
-:	  wget
-
-<br>
-json formatter with stream
-:	  jq
-
-<br>
-Generic syntax highlighter
-:	```sh
-    pygmentize -l xml
-	sudo apt-get install python-pygments
-	sudo apt-get install python-image
-	```
-
-<br>
-Formatter for xml
-:   ```sh
-    sudo apt-get install libxml2-utils			
-	xmllint
-	```
-
-<br>
-Get info of ip addresses in network (computer name, logged in user etc..)
-:   ```sh
-    sudo apt-get install nbtscan		
-	nbtscan 192.168.1.0/24
-	```
-
-<br>
-Network scanner. (find hosts systems and open ports on systems.)
-:   ```sh
-    sudo apt-get install nmap
-	nmap <ip-address>
-	```
-
-<br>
-Arbitrary TCP and UDP connections and listens 
-:	  nc
-
-<br>
-To record voice 
-:	  avconv -f pulse -i default file.wav
-
-<br>
-To edit sam file
-:	  chntpw
-
-<br>
-To get mouse coordinates, open windows etc
-:	  xdotool
-
-<br>
-Controlling audio devices
-:   ```sh
-    amixer -D pulse sset Master 5%+
-	alsamixer
-	```
-	<br>
-	If amixer is not found, install it using below command
-	```sh
-	sudo apt-get install alsa-utils
-	```
-
-<br>
-Control menubar time format or modify anyway
-:	gsettings set com.canonical.indicator.datetime show-seconds  true
-
-<br>
-Remove/Delete file completely (permanently)
-:	  shred -zun3 -f <file name>
-
-<br>
-Reduce JPEG file size
-:	  jpegoptim
-
-<br>
-Create Conda Environment
-:     ```sh
-      conda create --name email-sending-env python=3.7
-	  ```
-
-<br>
-
-### Delete all idle connections of postgresql
-```sql
-SELECT
-  DATE_TRUNC('second',NOW()-query_start) AS age,
-  pg_terminate_backend(pid),
-  *
-FROM
-  pg_stat_activity
-WHERE NOW() - query_start > '00:10:00'
-ORDER BY
-  age DESC;
+### Adding git with ssh protocol on windows
+Open git-bash 
+```sh
+ssh-keygen
+vim ~/.bashrc
 ```
+Enter following lines in editor
+```vi
+eval `ssh-agent`
+ssh-add
+```
+Restart git-bash
+```sh
+rm ~/.bashrc
+```
+Close git-bash
+RSA public key of ssh is present in .ssh directory inside %userprofile% 
+
+
+### Convert openssh private key to pem format
+```sh
+ssh-keygen -p -N "" -m pem -f /path/to/key
+```
+
+### Analyze which service taken how much time during startup or bootup
+```sh
+systemd-analyze blame
+```
+
+### Linux Sending mail from command line
+MSMTP (SMTP client)
+:   >(Documentation could be found at http://msmtp.sourceforge.net/doc/msmtp.html)
+    
+    ```sh
+	sudo apt-get install msmtp
+    vim ~/.msmtprc
+	```
+	Now in opened editor set default values for all following accounts.
+	```vi
+	# Set default values for all following accounts.
+	defaults
+	auth           on
+	tls            on
+	tls_trust_file /etc/ssl/certs/ca-certificates.crt
+	logfile        ~/.msmtp.log
+
+	# Gmail
+	account        gmail
+	host           smtp.gmail.com
+	port           587
+	from           username@gmail.com
+	user           username
+	password       plain-text-password
+
+	# A freemail service
+	account        freemail
+	host           smtp.freemail.example
+	from           joe_smith@freemail.example
+	...
+
+	# Set a default account
+	account default : gmail
+	```
+
+### Linux fetching mail from command line
+fetchmail (remote-mail retrieval and forwarding utility intended to be used over on-demand TCP/IP)
+`... PENDING ...`
+			
+	
+### Adding ssh client in linux
+```sh
+sudo apt-get install openssh-server
+```
+Create a file **~/.ssh/authorized_keys** if not exist
+```sh
+touch ~/.ssh/authorized_keys
+```
+Append your public key in this file
+```sh
+cat rsa_public_key.pub >> ~/.ssh/authorized_keys
+```
+Now you can access this linux from windows by following command
+```sh
+ssh -i rsa_private_key username@ipaddress
+```
+You can use ssh-keygen to create public private rsa key pair
+
+
+
+### Forcefully disconnect an ssh client
+find process id of ssh for client
+```sh
+sudo netstat -tnpa | grep ssh
+```
+kill process
+```sh
+kill -9 <pid>
+```
+
+
+
+### Logging ssh session   `Important`
+Download log-session script
+```sh
+wget http://www.jms1.net/log-session
+```
+Find out where the sftp-server binary is located
+```sh
+grep sftp /etc/ssh/sshd_config
+```
+Edit log-session file and replace following content
+```sh
+SFTP_SERVER=<location_of_sftp_server>
+SFTP_SERVER=/usr/lib/openssh/sftp-server
+```
+Make log-session file executable
+```sh
+chmod 755 log-session
+```
+Edit ~/.ssh/authorized_keys and append following
+```vi
+command="<location_of_log_session>"
+command="/usr/local/sbin/log-session" ssh-dss AAAAB3Nz...
+```
+
+
+### Securing your password with public key encryption
+Securing your password (or anything for the secure transmission of information between parties) with public key encryption
+Install gnupg
+```sh
+sudo apt-get install gnupg
+```
+Create key pair (give desired inputs and wait until key is created)
+```sh
+gpg --gen-key
+```
+To encrypt 
+```
+<CMD TO O/P> | gpg -e -r <RECIPIENT>
+```
+To decrypt
+```
+<CMD TO O/P> | gpg -d
+```
+To get list of keys
+```
+gpg -k
+```
+To get public key
+`... PENDING ...`
+	
+	
+### Downloading entire site with wget
+```sh
+wget \
+ --recursive \
+ --no-clobber \
+ --page-requisites \
+ --html-extension \
+ --convert-links \
+ --restrict-file-names=windows \
+ --domains website.org \
+ --no-parent \
+     www.website.org/tutorials/html/
+```
+
+### Persist iptables configuration
+install iptables-persistent
+```sh
+sudo apt-get install iptables-persistent
+```
+save iptables configuration with iptables-persistent
+```sh
+sudo iptables-persistent save
+```
+
+### Setting iptables to redirect port (could be used to set wildfly to get request from 80 port)
+```sh
+sudo iptables -A PREROUTING -t nat -p tcp --dport 80 -j REDIRECT --to-port 8080
+```
+
+### Setting iptables to redirect port on local machine
+```sh
+sudo iptables -t nat -I OUTPUT -p tcp -o lo --dport 80 -j REDIRECT --to-ports 8080
+```
+
+	
+### Get linux distribution information
+```sh
+lsb_release -a
+cat /etc/*-release
+uname -a
+cat /proc/version
+```
+
+
+### Compress, zip, extract files directory etc
+```sh
+tar -cvzf <filename_with_.tar.gz_extension> <directory_or_file>
+tar -xvzf <filename_with_.tar.gz_extension> 
+tar -cvzf - <file1> <file2> ... <filen>
+```
+
+### Continue last transaction of package manager like apt-get or yum
+```sh
+yum-complete-transaction [--cleanup-only] 
+yum history redo last
+```
+
+
+### View image from command line
+Using caca to view image with characters
+:   ```sh
+    sudo apt-get install caca-utils
+    cacaview <any_image_.jpg>
+    ```
+
+Using fbi which will use framebuffer
+: ```sh
+    sudo apt-get install fbi
+    fbi <any_image_.jpg>
+    ```
+
+### Creating desktop launcher for an application
+vim /home/$HOME/.local/share/applications/`<application_name>`.desktop
+```vi
+[Desktop Entry]
+Version=1.0
+Name=<Application Name>
+Comment=<e.g. Java IDE>
+Type=Application
+Categories=<e.g. Development;IDE;>
+Exec=<application location e.g. /home/${USERNAME}/applications/eclipse/eclipse>
+Terminal=false
+StartupNotify=true
+Icon=<icon location e.g. /home/${USERNAME}/applications/eclipse/icon.xpm>
+Name[en_US]=<Application Name e.g. Eclipse>
+```
+<br>
+<br>
+
+--- 
+# Installations
+
+### Installation scripts to setup environment 
+alpine setup environment
+```sh
+<<<<<<<<<<<<<<<<<<<<<<<<
+```
+
+### Adding new php version in wamp server
+	
+1.	create new folder [path-to-wamp]/bin/php/php.#.#.# and copy files here
+2. 	copy following files from older php
+	1. php.ini
+	2. phpForApache.ini
+	3. wampserver.conf
+3.	Take snapshots of wamp>PHP>PHP Settings and wamp>PHP>PHP Extendsion
+4.	Open wamp>PHP>php.ini and save it as a backup
+5.	Restart wamp , Change wamp>PHP>Version>latest_version
+6.	Use a diff tool to get differences between old php.ini and new one to satisfy all extensions
+
+		
+### Installing LAMPP
+	
+1.	Install apache web server
+    ```sh
+    sudo apt-get install apache2
+    ```
+	/etc/apache2/apache2.conf contains configurations
+	/etc/apache2/ports.conf contains ports configuration
+2. Install PHP
+    ```sh
+    sudo apt-get install php5 libapache2-mod-php5
+    ```
+    directory for lookup is /var/www/html
+3.	Install mysql
+    ```sh
+    sudo apt-get install mysql-server
+    ```
+	add following lines in /etc/apache2/apache2.conf
+	```vi
+	#phpMyAdmin Configuration
+	Include /etc/phpmyadmin/apache.conf
+	```
+4.	In Ubuntu also need to run following commands to make mcrypt recognized in phpmyadmin/install mcrypt right way
+	```sh
+	php5enmod mcrypt
+	```
+
+### Installing LEMP
+1.  Install nginx 
+    ```sh
+    sudo apt-get install nginx
+    ```
+	Edit /etc/nginx/sites-available/default
+	(If /usr/share/nginx/www does not exist, it's probably called html. Make sure you update your configuration appropriately)
+	1. Add index.php to the index line.
+	2. Change the server_name from local host to your domain name or IP address (replace the example.com in the configuration)
+	3. Change the correct lines in "location ~ \.php$ {" section
+	    ```vi
+		server {
+			listen   80;
+	
+			root /usr/share/nginx/www;
+			index index.php index.html index.htm;
+
+			server_name example.com;
+
+			location / {
+					try_files $uri $uri/ /index.html;
+			}
+
+			error_page 404 /404.html;
+
+			error_page 500 502 503 504 /50x.html;
+			location = /50x.html {
+				  root /usr/share/nginx/www;
+			}
+			
+			# pass the PHP scripts to FastCGI server listening on the php-fpm socket
+			location ~ \.php$ {
+					try_files $uri =404;
+					fastcgi_pass unix:/var/run/php5-fpm.sock;
+					fastcgi_index index.php;
+					fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+					include fastcgi_params;
+					
+			}
+		}
+		```
+		
+2.  Install mysql with php-mysql
+	```sh
+    sudo apt-get install mysql-server php5-mysql
+    ```
+	Activate mysql
+	```sh
+	sudo mysql_install_db
+    ```
+	setup script
+	```sh
+	sudo /usr/bin/mysql_secure_installation
+    ```
+	
+3. 	Install PHP
+    ```sh
+	sudo apt-get install php5-fpm
+	```
+	
+	Configure php
+	Edit php.ini file vim /etc/php5/fpm/php.ini
+    ```vi
+    cgi.fix_pathinfo=0
+    ```
+    
+	Edit /etc/php5/fpm/pool.d/www.conf
+	Find the line, `listen = 127.0.0.1:9000`, and change the `127.0.0.1:9000` to `/var/run/php5-fpm.sock`. 
+	```vi
+	listen = /var/run/php5-fpm.sock
+	```
+	Restart php-fpm
+	```sh
+    sudo service php5-fpm restart
+    ```
+    
+4. Create info.php
+    ```sh
+	sudo nano /usr/share/nginx/html/info.php
+	```
+	```vi
+	<?php
+	phpinfo();
+	?>
+	```
+	restart nginx
+	```sh
+	sudo service nginx restart
+	```
+
+	
+### Installing Composer in Linux
+1. Download the installer to the current directory
+2. Verify the installer SHA-384 either by below command or cross checking at https://composer.github.io/pubkeys.html
+	php -r "if (hash('SHA384', file_get_contents('composer-setup.php')) === 'fd26ce67e3b237fffd5e5544b45b0d92c41a4afe3e3f778e942e43ce6be197b9cdc7c251dcde6e2a52297ea269370680') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); }"
+3.	Run the installer
+		php composer-setup.php
+4.	Remove the installer
+		php -r "unlink('composer-setup.php');"
+5.	To install composer Globally move the downloaded file to /usr/local/bin/composer
+		mv composer.phar /usr/local/bin/composer
+
+### Installing Laravel 
+On Windows 
+:   ```sh
+    composer global require "laravel/installer"
+    ```
+On Linux using local composer.phar
+:    ```sh
+	php composer.phar global require "laravel/installer"
+	```
+
+**Plugin to add laravel framework in netbeans**
+*https://github.com/nbphpcouncil/nb-laravel-plugin/releases*
+
+			
+	
+### Installing java manually
+Download .tar.gz file (preferred to be downloaded from oracle's site)
+```sh
+wget  --no-cookies --no-check-certificate --header "Cookie: gpw_e24=http%3A%2F%2Fwww.oracle.com%2F; oraclelicense=accept-securebackup-cookie" <url>
+```
+
+Extract .tar.gz file in /opt directory
+```sh
+tar -zxvf jdk-*u**-linux-****.tar.gz
+```
+Create symbolic link in order to simplify java updates in future
+```sh
+ln -s /opt/jdk1.8.0_144 /opt/java
+```
+Tell system where java and ts executables are intalled.
+```sh
+update-alternatives --install /usr/bin/java java /opt/java/bin/java 100
+update-alternatives --config java
+```
+Create necessary environment variables
+```sh
+sudo vim /etc/profile.d/java.sh
+```
+```bash
+if ! echo ${PATH} | grep -q /opt/java/bin ; then
+	export PATH=/opt/java/bin:${PATH}
+fi      
+if ! echo ${PATH} | grep -q /opt/java/jre/bin ; then
+   export PATH=/opt/java/jre/bin:${PATH}
+fi      
+export JAVA_HOME=/opt/java
+export JRE_HOME=/opt/java/jre
+export CLASSPATH=.:/opt/java/lib/tools.jar:/opt/java/jre/lib/rt.jar
+```
+```sh
+sudo chmod 755 /etc/profile.d/java.sh
+```
+
+
+### Uninstall a package properly on Ubuntu
+```sh
+sudo apt-get purge git; 
+sudo apt-get autoremove;
+```
+now delete related files if exist in your home directory 
+```sh
+rm ~/.gitconfig
+```
+			
+### Installing postgresql debugger
+Edit postgresql.conf file present in  c:\program files\postgresql\9.3\data directory
+Un-comment or add this line:
+```vi
+shared_preload_libraries = '$libdir/plugin_debugger.dll'
+```
+Restart PostgreSQL server
+In the required database run following command 
+```sql
+create extension pldbgapi;
+```
+		
+
+### Maven download / install sources and javadocs
+Download sources
+```sh
+mvn dependency:sources
+```
+Download docs
+```sh
+mvn dependency:resolve -Dclassifier=javadoc
+```
+Download sources of specific package
+```sh
+mvn dependency:sources -DincludeArtifactIds=guava
+```
+Add plugin in pom.xml
+```pom
+<plugin>
+    <groupId>org.apache.maven.plugins</groupId>
+    <artifactId>maven-eclipse-plugin</artifactId>
+    <configuration>
+        <downloadSources>true</downloadSources>
+        <downloadJavadocs>true</downloadJavadocs>
+    </configuration>
+</plugin>
+```
+
+### Maven run a particular class
+Directly from command line
+:   ```
+    mvn exec:java -Dexec.mainClass="com.example.Main"
+    mvn exec:java -Dexec.mainClass="com.example.Main" -Dexec.args="arg0 arg1"
+    ```
+Using plugin
+:   ```pom
+	<plugin>
+	  <groupId>org.codehaus.mojo</groupId>
+	  <artifactId>exec-maven-plugin</artifactId>
+	  <version>1.2.1</version>
+	  <executions>
+		<execution>
+		  <goals>
+			<goal>java</goal>
+		  </goals>
+		</execution>
+	  </executions>
+	  <configuration>
+		<mainClass>com.example.Main</mainClass>
+		<arguments>
+		  <argument>foo</argument>
+		  <argument>bar</argument>
+		</arguments>
+	  </configuration>
+	</plugin>
+	```
+
+
+### Mongodb on Ubuntu-16.0
+*Reference taken from https://www.howtoforge.com/tutorial/install-mongodb-on-ubuntu-16.04*
+Importing key
+```sh
+sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv EA312927
+```
+Create source list file MongoDB
+```sh
+echo "deb http://repo.mongodb.org/apt/ubuntu "$(lsb_release -sc)"/mongodb-org/3.2 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.2.list
+sudo apt-get install mongodb-org
+```
+Create a new mongodb systemd service file in the '/lib/systemd/system' directory.
+```sh
+cd /lib/systemd/system/
+vim mongod.service
+```
+Now update the systemd service with command below:
+```sh
+systemctl daemon-reload
+```
+Start mongodb and add it as service to be started at boot time:
+```sh
+systemctl start mongod
+systemctl enable mongod
+```
+
+*Further to add mongodb in php*
+```sh
+composer require mongodb/mongodb
+```
+
+
+### Generic runnable/executable file/application as service in ubuntu
+Edit /etc/systemd/system/prometheus.service
+```vi	
+[Unit]
+Description=Prometheus Service
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/prometheus/prometheus --config.file=/usr/local/bin/prometheus/prometheus.yml
+
+[Install]
+WantedBy=multi-user.target 
+```
+```sh
+sudo service prometheus start
+```
+<br>
+<br>
+
+---
+# Setup
+		
+### Disabling lightdm (or other service) 
+1. Method 1
+	```sh
+    echo manual | sudo tee etc/init.d/lightdm.override
+    ```
+	i.e. create <service>.override file to disable it (override it)
+	*This method is not working after 14.0*
+
+2. Method 2 
+	edit /etc/default/grub
+	replace 	GRUB_CMDLINE_LINUX_DEFAULT="quiet splash"
+	with		GRUB_CMDLINE_LINUX_DEFAULT="text"
+	```sh
+    sudo update-grub
+    ```
+
+### Disable ssh login without password
+1.  Edit /etc/ssh/sshd_config and change following settings
+    ```vi
+	ChallengeResponseAuthentication no
+	PasswordAuthentication no
+	UsePAM no
+	```
+	```sh
+	sudo /etc/init.d/ssh reload
+	```
+	
+### Setting git to login wihout password + using ssh in git
+Create ssh-key
+```sh
+ssh-keygen
+```
+Copy your .pub file in remote git application from where you want to connect
+Add your private key using ssh-agent into your system (if you don't want to provide key every time)
+```sh
+ssh-add ~/.ssh/id_rsa
+```
+<br>
+<br>
+
+### Adding git with ssh protocol on windows
+Open git-bash 
+```sh
+ssh-keygen
+vim ~/.bashrc
+```
+Enter following lines in editor
+```vi
+eval `ssh-agent`
+ssh-add
+```
+Restart git-bash
+```sh
+rm ~/.bashrc
+```
+Close git-bash
+RSA public key of ssh is present in .ssh directory inside %userprofile% 
+
+
+### Convert openssh private key to pem format
+```sh
+ssh-keygen -p -N "" -m pem -f /path/to/key
+```
+
+### Analyze which service taken how much time during startup or bootup
+```sh
+systemd-analyze blame
+```
+
+### Linux Sending mail from command line
+MSMTP (SMTP client)
+:   >(Documentation could be found at http://msmtp.sourceforge.net/doc/msmtp.html)
+    
+    ```sh
+	sudo apt-get install msmtp
+    vim ~/.msmtprc
+	```
+	Now in opened editor set default values for all following accounts.
+	```vi
+	# Set default values for all following accounts.
+	defaults
+	auth           on
+	tls            on
+	tls_trust_file /etc/ssl/certs/ca-certificates.crt
+	logfile        ~/.msmtp.log
+
+	# Gmail
+	account        gmail
+	host           smtp.gmail.com
+	port           587
+	from           username@gmail.com
+	user           username
+	password       plain-text-password
+
+	# A freemail service
+	account        freemail
+	host           smtp.freemail.example
+	from           joe_smith@freemail.example
+	...
+
+	# Set a default account
+	account default : gmail
+	```
+
+### Linux fetching mail from command line
+fetchmail (remote-mail retrieval and forwarding utility intended to be used over on-demand TCP/IP)
+`... PENDING ...`
+			
+	
+### Adding ssh client in linux
+```sh
+sudo apt-get install openssh-server
+```
+Create a file **~/.ssh/authorized_keys** if not exist
+```sh
+touch ~/.ssh/authorized_keys
+```
+Append your public key in this file
+```sh
+cat rsa_public_key.pub >> ~/.ssh/authorized_keys
+```
+Now you can access this linux from windows by following command
+```sh
+ssh -i rsa_private_key username@ipaddress
+```
+You can use ssh-keygen to create public private rsa key pair
+
+
+
+### Forcefully disconnect an ssh client
+find process id of ssh for client
+```sh
+sudo netstat -tnpa | grep ssh
+```
+kill process
+```sh
+kill -9 <pid>
+```
+
+
+
+### Logging ssh session   `Important`
+Download log-session script
+```sh
+wget http://www.jms1.net/log-session
+```
+Find out where the sftp-server binary is located
+```sh
+grep sftp /etc/ssh/sshd_config
+```
+Edit log-session file and replace following content
+```sh
+SFTP_SERVER=<location_of_sftp_server>
+SFTP_SERVER=/usr/lib/openssh/sftp-server
+```
+Make log-session file executable
+```sh
+chmod 755 log-session
+```
+Edit ~/.ssh/authorized_keys and append following
+```vi
+command="<location_of_log_session>"
+command="/usr/local/sbin/log-session" ssh-dss AAAAB3Nz...
+```
+
+
+### Securing your password with public key encryption
+Securing your password (or anything for the secure transmission of information between parties) with public key encryption
+Install gnupg
+```sh
+sudo apt-get install gnupg
+```
+Create key pair (give desired inputs and wait until key is created)
+```sh
+gpg --gen-key
+```
+To encrypt 
+```
+<CMD TO O/P> | gpg -e -r <RECIPIENT>
+```
+To decrypt
+```
+<CMD TO O/P> | gpg -d
+```
+To get list of keys
+```
+gpg -k
+```
+To get public key
+`... PENDING ...`
+	
+	
+### Downloading entire site with wget
+```sh
+wget \
+ --recursive \
+ --no-clobber \
+ --page-requisites \
+ --html-extension \
+ --convert-links \
+ --restrict-file-names=windows \
+ --domains website.org \
+ --no-parent \
+     www.website.org/tutorials/html/
+```
+
+### Persist iptables configuration
+install iptables-persistent
+```sh
+sudo apt-get install iptables-persistent
+```
+save iptables configuration with iptables-persistent
+```sh
+sudo iptables-persistent save
+```
+
+### Setting iptables to redirect port (could be used to set wildfly to get request from 80 port)
+```sh
+sudo iptables -A PREROUTING -t nat -p tcp --dport 80 -j REDIRECT --to-port 8080
+```
+
+### Setting iptables to redirect port on local machine
+```sh
+sudo iptables -t nat -I OUTPUT -p tcp -o lo --dport 80 -j REDIRECT --to-ports 8080
+```
+
+	
+### Get linux distribution information
+```sh
+lsb_release -a
+cat /etc/*-release
+uname -a
+cat /proc/version
+```
+
+
+### Compress, zip, extract files directory etc
+```sh
+tar -cvzf <filename_with_.tar.gz_extension> <directory_or_file>
+tar -xvzf <filename_with_.tar.gz_extension> 
+tar -cvzf - <file1> <file2> ... <filen>
+```
+
+### Continue last transaction of package manager like apt-get or yum
+```sh
+yum-complete-transaction [--cleanup-only] 
+yum history redo last
+```
+
+
+### View image from command line
+Using caca to view image with characters
+:   ```sh
+    sudo apt-get install caca-utils
+    cacaview <any_image_.jpg>
+    ```
+
+Using fbi which will use framebuffer
+: ```sh
+    sudo apt-get install fbi
+    fbi <any_image_.jpg>
+    ```
+
+### Creating desktop launcher for an application
+vim /home/$HOME/.local/share/applications/`<application_name>`.desktop
+```vi
+[Desktop Entry]
+Version=1.0
+Name=<Application Name>
+Comment=<e.g. Java IDE>
+Type=Application
+Categories=<e.g. Development;IDE;>
+Exec=<application location e.g. /home/${USERNAME}/applications/eclipse/eclipse>
+Terminal=false
+StartupNotify=true
+Icon=<icon location e.g. /home/${USERNAME}/applications/eclipse/icon.xpm>
+Name[en_US]=<Application Name e.g. Eclipse>
+```
+<br>
+<br>
+
+--- 
+# Installations
+
+### Installation scripts to setup environment 
+alpine setup environment
+```sh
+<<<<<<<<<<<<<<<<<<<<<<<<
+```
+
+### Adding new php version in wamp server
+	
+1.	create new folder [path-to-wamp]/bin/php/php.#.#.# and copy files here
+2. 	copy following files from older php
+	1. php.ini
+	2. phpForApache.ini
+	3. wampserver.conf
+3.	Take snapshots of wamp>PHP>PHP Settings and wamp>PHP>PHP Extendsion
+4.	Open wamp>PHP>php.ini and save it as a backup
+5.	Restart wamp , Change wamp>PHP>Version>latest_version
+6.	Use a diff tool to get differences between old php.ini and new one to satisfy all extensions
+
+		
+### Installing LAMPP
+	
+1.	Install apache web server
+    ```sh
+    sudo apt-get install apache2
+    ```
+	/etc/apache2/apache2.conf contains configurations
+	/etc/apache2/ports.conf contains ports configuration
+2. Install PHP
+    ```sh
+    sudo apt-get install php5 libapache2-mod-php5
+    ```
+    directory for lookup is /var/www/html
+3.	Install mysql
+    ```sh
+    sudo apt-get install mysql-server
+    ```
+	add following lines in /etc/apache2/apache2.conf
+	```vi
+	#phpMyAdmin Configuration
+	Include /etc/phpmyadmin/apache.conf
+	```
+4.	In Ubuntu also need to run following commands to make mcrypt recognized in phpmyadmin/install mcrypt right way
+	```sh
+	php5enmod mcrypt
+	```
+
+### Installing LEMP
+1.  Install nginx 
+    ```sh
+    sudo apt-get install nginx
+    ```
+	Edit /etc/nginx/sites-available/default
+	(If /usr/share/nginx/www does not exist, it's probably called html. Make sure you update your configuration appropriately)
+	1. Add index.php to the index line.
+	2. Change the server_name from local host to your domain name or IP address (replace the example.com in the configuration)
+	3. Change the correct lines in "location ~ \.php$ {" section
+	    ```vi
+		server {
+			listen   80;
+	
+			root /usr/share/nginx/www;
+			index index.php index.html index.htm;
+
+			server_name example.com;
+
+			location / {
+					try_files $uri $uri/ /index.html;
+			}
+
+			error_page 404 /404.html;
+
+			error_page 500 502 503 504 /50x.html;
+			location = /50x.html {
+				  root /usr/share/nginx/www;
+			}
+			
+			# pass the PHP scripts to FastCGI server listening on the php-fpm socket
+			location ~ \.php$ {
+					try_files $uri =404;
+					fastcgi_pass unix:/var/run/php5-fpm.sock;
+					fastcgi_index index.php;
+					fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+					include fastcgi_params;
+					
+			}
+		}
+		```
+		
+2.  Install mysql with php-mysql
+	```sh
+    sudo apt-get install mysql-server php5-mysql
+    ```
+	Activate mysql
+	```sh
+	sudo mysql_install_db
+    ```
+	setup script
+	```sh
+	sudo /usr/bin/mysql_secure_installation
+    ```
+	
+3. 	Install PHP
+    ```sh
+	sudo apt-get install php5-fpm
+	```
+	
+	Configure php
+	Edit php.ini file vim /etc/php5/fpm/php.ini
+    ```vi
+    cgi.fix_pathinfo=0
+    ```
+    
+	Edit /etc/php5/fpm/pool.d/www.conf
+	Find the line, `listen = 127.0.0.1:9000`, and change the `127.0.0.1:9000` to `/var/run/php5-fpm.sock`. 
+	```vi
+	listen = /var/run/php5-fpm.sock
+	```
+	Restart php-fpm
+	```sh
+    sudo service php5-fpm restart
+    ```
+    
+4. Create info.php
+    ```sh
+	sudo nano /usr/share/nginx/html/info.php
+	```
+	```vi
+	<?php
+	phpinfo();
+	?>
+	```
+	restart nginx
+	```sh
+	sudo service nginx restart
+	```
+
+	
+### Installing Composer in Linux
+1. Download the installer to the current directory
+2. Verify the installer SHA-384 either by below command or cross checking at https://composer.github.io/pubkeys.html
+	php -r "if (hash('SHA384', file_get_contents('composer-setup.php')) === 'fd26ce67e3b237fffd5e5544b45b0d92c41a4afe3e3f778e942e43ce6be197b9cdc7c251dcde6e2a52297ea269370680') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); }"
+3.	Run the installer
+		php composer-setup.php
+4.	Remove the installer
+		php -r "unlink('composer-setup.php');"
+5.	To install composer Globally move the downloaded file to /usr/local/bin/composer
+		mv composer.phar /usr/local/bin/composer
+
+### Installing Laravel 
+On Windows 
+:   ```sh
+    composer global require "laravel/installer"
+    ```
+On Linux using local composer.phar
+:    ```sh
+	php composer.phar global require "laravel/installer"
+	```
+
+**Plugin to add laravel framework in netbeans**
+*https://github.com/nbphpcouncil/nb-laravel-plugin/releases*
+
+			
+	
+### Installing java manually
+Download .tar.gz file (preferred to be downloaded from oracle's site)
+```sh
+wget  --no-cookies --no-check-certificate --header "Cookie: gpw_e24=http%3A%2F%2Fwww.oracle.com%2F; oraclelicense=accept-securebackup-cookie" <url>
+```
+
+Extract .tar.gz file in /opt directory
+```sh
+tar -zxvf jdk-*u**-linux-****.tar.gz
+```
+Create symbolic link in order to simplify java updates in future
+```sh
+ln -s /opt/jdk1.8.0_144 /opt/java
+```
+Tell system where java and ts executables are intalled.
+```sh
+update-alternatives --install /usr/bin/java java /opt/java/bin/java 100
+update-alternatives --config java
+```
+Create necessary environment variables
+```sh
+sudo vim /etc/profile.d/java.sh
+```
+```bash
+if ! echo ${PATH} | grep -q /opt/java/bin ; then
+	export PATH=/opt/java/bin:${PATH}
+fi      
+if ! echo ${PATH} | grep -q /opt/java/jre/bin ; then
+   export PATH=/opt/java/jre/bin:${PATH}
+fi      
+export JAVA_HOME=/opt/java
+export JRE_HOME=/opt/java/jre
+export CLASSPATH=.:/opt/java/lib/tools.jar:/opt/java/jre/lib/rt.jar
+```
+```sh
+sudo chmod 755 /etc/profile.d/java.sh
+```
+
+
+### Uninstall a package properly on Ubuntu
+```sh
+sudo apt-get purge git; 
+sudo apt-get autoremove;
+```
+now delete related files if exist in your home directory 
+```sh
+rm ~/.gitconfig
+```
+			
+### Installing postgresql debugger
+Edit postgresql.conf file present in  c:\program files\postgresql\9.3\data directory
+Un-comment or add this line:
+```vi
+shared_preload_libraries = '$libdir/plugin_debugger.dll'
+```
+Restart PostgreSQL server
+In the required database run following command 
+```sql
+create extension pldbgapi;
+```
+		
+
+### Maven download / install sources and javadocs
+Download sources
+```sh
+mvn dependency:sources
+```
+Download docs
+```sh
+mvn dependency:resolve -Dclassifier=javadoc
+```
+Download sources of specific package
+```sh
+mvn dependency:sources -DincludeArtifactIds=guava
+```
+Add plugin in pom.xml
+```pom
+<plugin>
+    <groupId>org.apache.maven.plugins</groupId>
+    <artifactId>maven-eclipse-plugin</artifactId>
+    <configuration>
+        <downloadSources>true</downloadSources>
+        <downloadJavadocs>true</downloadJavadocs>
+    </configuration>
+</plugin>
+```
+
+### Maven run a particular class
+Directly from command line
+:   ```
+    mvn exec:java -Dexec.mainClass="com.example.Main"
+    mvn exec:java -Dexec.mainClass="com.example.Main" -Dexec.args="arg0 arg1"
+    ```
+Using plugin
+:   ```pom
+	<plugin>
+	  <groupId>org.codehaus.mojo</groupId>
+	  <artifactId>exec-maven-plugin</artifactId>
+	  <version>1.2.1</version>
+	  <executions>
+		<execution>
+		  <goals>
+			<goal>java</goal>
+		  </goals>
+		</execution>
+	  </executions>
+	  <configuration>
+		<mainClass>com.example.Main</mainClass>
+		<arguments>
+		  <argument>foo</argument>
+		  <argument>bar</argument>
+		</arguments>
+	  </configuration>
+	</plugin>
+	```
+
+
+### Mongodb on Ubuntu-16.0
+*Reference taken from https://www.howtoforge.com/tutorial/install-mongodb-on-ubuntu-16.04*
+Importing key
+```sh
+sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv EA312927
+```
+Create source list file MongoDB
+```sh
+echo "deb http://repo.mongodb.org/apt/ubuntu "$(lsb_release -sc)"/mongodb-org/3.2 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.2.list
+sudo apt-get install mongodb-org
+```
+Create a new mongodb systemd service file in the '/lib/systemd/system' directory.
+```sh
+cd /lib/systemd/system/
+vim mongod.service
+```
+Now update the systemd service with command below:
+```sh
+systemctl daemon-reload
+```
+Start mongodb and add it as service to be started at boot time:
+```sh
+systemctl start mongod
+systemctl enable mongod
+```
+
+*Further to add mongodb in php*
+```sh
+composer require mongodb/mongodb
+```
+
+
+### Generic runnable/executable file/application as service in ubuntu
+Edit /etc/systemd/system/prometheus.service
+```vi	
+[Unit]
+Description=Prometheus Service
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/prometheus/prometheus --config.file=/usr/local/bin/prometheus/prometheus.yml
+
+[Install]
+WantedBy=multi-user.target 
+```
+```sh
+sudo service prometheus start
+```
+<br>
+<br>
+
+---
+# Setup
+		
+### Disabling lightdm (or other service) 
+1. Method 1
+	```sh
+    echo manual | sudo tee etc/init.d/lightdm.override
+    ```
+	i.e. create <service>.override file to disable it (override it)
+	*This method is not working after 14.0*
+
+2. Method 2 
+	edit /etc/default/grub
+	replace 	GRUB_CMDLINE_LINUX_DEFAULT="quiet splash"
+	with		GRUB_CMDLINE_LINUX_DEFAULT="text"
+	```sh
+    sudo update-grub
+    ```
+
+### Disable ssh login without password
+1.  Edit /etc/ssh/sshd_config and change following settings
+    ```vi
+	ChallengeResponseAuthentication no
+	PasswordAuthentication no
+	UsePAM no
+	```
+	```sh
+	sudo /etc/init.d/ssh reload
+	```
+	
+### Setting git to login wihout password + using ssh in git
+Create ssh-key
+```sh
+ssh-keygen
+```
+Copy your .pub file in remote git application from where you want to connect
+Add your private key using ssh-agent into your system (if you don't want to provide key every time)
+```sh
+ssh-add ~/.ssh/id_rsa
+```
+<br>
+<br>
+
+### Adding git with ssh protocol on windows
+Open git-bash 
+```sh
+ssh-keygen
+vim ~/.bashrc
+```
+Enter following lines in editor
+```vi
+eval `ssh-agent`
+ssh-add
+```
+Restart git-bash
+```sh
+rm ~/.bashrc
+```
+Close git-bash
+RSA public key of ssh is present in .ssh directory inside %userprofile% 
+
+
+### Convert openssh private key to pem format
+```sh
+ssh-keygen -p -N "" -m pem -f /path/to/key
+```
+
+### Analyze which service taken how much time during startup or bootup
+```sh
+systemd-analyze blame
+```
+
+### Linux Sending mail from command line
+MSMTP (SMTP client)
+:   >(Documentation could be found at http://msmtp.sourceforge.net/doc/msmtp.html)
+    
+    ```sh
+	sudo apt-get install msmtp
+    vim ~/.msmtprc
+	```
+	Now in opened editor set default values for all following accounts.
+	```vi
+	# Set default values for all following accounts.
+	defaults
+	auth           on
+	tls            on
+	tls_trust_file /etc/ssl/certs/ca-certificates.crt
+	logfile        ~/.msmtp.log
+
+	# Gmail
+	account        gmail
+	host           smtp.gmail.com
+	port           587
+	from           username@gmail.com
+	user           username
+	password       plain-text-password
+
+	# A freemail service
+	account        freemail
+	host           smtp.freemail.example
+	from           joe_smith@freemail.example
+	...
+
+	# Set a default account
+	account default : gmail
+	```
+
+### Linux fetching mail from command line
+fetchmail (remote-mail retrieval and forwarding utility intended to be used over on-demand TCP/IP)
+`... PENDING ...`
+			
+	
+### Adding ssh client in linux
+```sh
+sudo apt-get install openssh-server
+```
+Create a file **~/.ssh/authorized_keys** if not exist
+```sh
+touch ~/.ssh/authorized_keys
+```
+Append your public key in this file
+```sh
+cat rsa_public_key.pub >> ~/.ssh/authorized_keys
+```
+Now you can access this linux from windows by following command
+```sh
+ssh -i rsa_private_key username@ipaddress
+```
+You can use ssh-keygen to create public private rsa key pair
+
+
+
+### Forcefully disconnect an ssh client
+find process id of ssh for client
+```sh
+sudo netstat -tnpa | grep ssh
+```
+kill process
+```sh
+kill -9 <pid>
+```
+
+
+
+### Logging ssh session   `Important`
+Download log-session script
+```sh
+wget http://www.jms1.net/log-session
+```
+Find out where the sftp-server binary is located
+```sh
+grep sftp /etc/ssh/sshd_config
+```
+Edit log-session file and replace following content
+```sh
+SFTP_SERVER=<location_of_sftp_server>
+SFTP_SERVER=/usr/lib/openssh/sftp-server
+```
+Make log-session file executable
+```sh
+chmod 755 log-session
+```
+Edit ~/.ssh/authorized_keys and append following
+```vi
+command="<location_of_log_session>"
+command="/usr/local/sbin/log-session" ssh-dss AAAAB3Nz...
+```
+
+
+### Securing your password with public key encryption
+Securing your password (or anything for the secure transmission of information between parties) with public key encryption
+Install gnupg
+```sh
+sudo apt-get install gnupg
+```
+Create key pair (give desired inputs and wait until key is created)
+```sh
+gpg --gen-key
+```
+To encrypt 
+```
+<CMD TO O/P> | gpg -e -r <RECIPIENT>
+```
+To decrypt
+```
+<CMD TO O/P> | gpg -d
+```
+To get list of keys
+```
+gpg -k
+```
+To get public key
+`... PENDING ...`
+	
+	
+### Downloading entire site with wget
+```sh
+wget \
+ --recursive \
+ --no-clobber \
+ --page-requisites \
+ --html-extension \
+ --convert-links \
+ --restrict-file-names=windows \
+ --domains website.org \
+ --no-parent \
+     www.website.org/tutorials/html/
+```
+
+### Persist iptables configuration
+install iptables-persistent
+```sh
+sudo apt-get install iptables-persistent
+```
+save iptables configuration with iptables-persistent
+```sh
+sudo iptables-persistent save
+```
+
+### Setting iptables to redirect port (could be used to set wildfly to get request from 80 port)
+```sh
+sudo iptables -A PREROUTING -t nat -p tcp --dport 80 -j REDIRECT --to-port 8080
+```
+
+### Setting iptables to redirect port on local machine
+```sh
+sudo iptables -t nat -I OUTPUT -p tcp -o lo --dport 80 -j REDIRECT --to-ports 8080
+```
+
+	
+### Get linux distribution information
+```sh
+lsb_release -a
+cat /etc/*-release
+uname -a
+cat /proc/version
+```
+
+
+### Compress, zip, extract files directory etc
+```sh
+tar -cvzf <filename_with_.tar.gz_extension> <directory_or_file>
+tar -xvzf <filename_with_.tar.gz_extension> 
+tar -cvzf - <file1> <file2> ... <filen>
+```
+
+### Continue last transaction of package manager like apt-get or yum
+```sh
+yum-complete-transaction [--cleanup-only] 
+yum history redo last
+```
+
+
+### View image from command line
+Using caca to view image with characters
+:   ```sh
+    sudo apt-get install caca-utils
+    cacaview <any_image_.jpg>
+    ```
+
+Using fbi which will use framebuffer
+: ```sh
+    sudo apt-get install fbi
+    fbi <any_image_.jpg>
+    ```
+
+### Creating desktop launcher for an application
+vim /home/$HOME/.local/share/applications/`<application_name>`.desktop
+```vi
+[Desktop Entry]
+Version=1.0
+Name=<Application Name>
+Comment=<e.g. Java IDE>
+Type=Application
+Categories=<e.g. Development;IDE;>
+Exec=<application location e.g. /home/${USERNAME}/applications/eclipse/eclipse>
+Terminal=false
+StartupNotify=true
+Icon=<icon location e.g. /home/${USERNAME}/applications/eclipse/icon.xpm>
+Name[en_US]=<Application Name e.g. Eclipse>
+```
+<br>
+<br>
+
+--- 
+# Installations
+
+### Installation scripts to setup environment 
+alpine setup environment
+```sh
+<<<<<<<<<<<<<<<<<<<<<<<<
+```
+
+### Adding new php version in wamp server
+	
+1.	create new folder [path-to-wamp]/bin/php/php.#.#.# and copy files here
+2. 	copy following files from older php
+	1. php.ini
+	2. phpForApache.ini
+	3. wampserver.conf
+3.	Take snapshots of wamp>PHP>PHP Settings and wamp>PHP>PHP Extendsion
+4.	Open wamp>PHP>php.ini and save it as a backup
+5.	Restart wamp , Change wamp>PHP>Version>latest_version
+6.	Use a diff tool to get differences between old php.ini and new one to satisfy all extensions
+
+		
+### Installing LAMPP
+	
+1.	Install apache web server
+    ```sh
+    sudo apt-get install apache2
+    ```
+	/etc/apache2/apache2.conf contains configurations
+	/etc/apache2/ports.conf contains ports configuration
+2. Install PHP
+    ```sh
+    sudo apt-get install php5 libapache2-mod-php5
+    ```
+    directory for lookup is /var/www/html
+3.	Install mysql
+    ```sh
+    sudo apt-get install mysql-server
+    ```
+	add following lines in /etc/apache2/apache2.conf
+	```vi
+	#phpMyAdmin Configuration
+	Include /etc/phpmyadmin/apache.conf
+	```
+4.	In Ubuntu also need to run following commands to make mcrypt recognized in phpmyadmin/install mcrypt right way
+	```sh
+	php5enmod mcrypt
+	```
+
+### Installing LEMP
+1.  Install nginx 
+    ```sh
+    sudo apt-get install nginx
+    ```
+	Edit /etc/nginx/sites-available/default
+	(If /usr/share/nginx/www does not exist, it's probably called html. Make sure you update your configuration appropriately)
+	1. Add index.php to the index line.
+	2. Change the server_name from local host to your domain name or IP address (replace the example.com in the configuration)
+	3. Change the correct lines in "location ~ \.php$ {" section
+	    ```vi
+		server {
+			listen   80;
+	
+			root /usr/share/nginx/www;
+			index index.php index.html index.htm;
+
+			server_name example.com;
+
+			location / {
+					try_files $uri $uri/ /index.html;
+			}
+
+			error_page 404 /404.html;
+
+			error_page 500 502 503 504 /50x.html;
+			location = /50x.html {
+				  root /usr/share/nginx/www;
+			}
+			
+			# pass the PHP scripts to FastCGI server listening on the php-fpm socket
+			location ~ \.php$ {
+					try_files $uri =404;
+					fastcgi_pass unix:/var/run/php5-fpm.sock;
+					fastcgi_index index.php;
+					fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+					include fastcgi_params;
+					
+			}
+		}
+		```
+		
+2.  Install mysql with php-mysql
+	```sh
+    sudo apt-get install mysql-server php5-mysql
+    ```
+	Activate mysql
+	```sh
+	sudo mysql_install_db
+    ```
+	setup script
+	```sh
+	sudo /usr/bin/mysql_secure_installation
+    ```
+	
+3. 	Install PHP
+    ```sh
+	sudo apt-get install php5-fpm
+	```
+	
+	Configure php
+	Edit php.ini file vim /etc/php5/fpm/php.ini
+    ```vi
+    cgi.fix_pathinfo=0
+    ```
+    
+	Edit /etc/php5/fpm/pool.d/www.conf
+	Find the line, `listen = 127.0.0.1:9000`, and change the `127.0.0.1:9000` to `/var/run/php5-fpm.sock`. 
+	```vi
+	listen = /var/run/php5-fpm.sock
+	```
+	Restart php-fpm
+	```sh
+    sudo service php5-fpm restart
+    ```
+    
+4. Create info.php
+    ```sh
+	sudo nano /usr/share/nginx/html/info.php
+	```
+	```vi
+	<?php
+	phpinfo();
+	?>
+	```
+	restart nginx
+	```sh
+	sudo service nginx restart
+	```
+
+	
+### Installing Composer in Linux
+1. Download the installer to the current directory
+2. Verify the installer SHA-384 either by below command or cross checking at https://composer.github.io/pubkeys.html
+	php -r "if (hash('SHA384', file_get_contents('composer-setup.php')) === 'fd26ce67e3b237fffd5e5544b45b0d92c41a4afe3e3f778e942e43ce6be197b9cdc7c251dcde6e2a52297ea269370680') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); }"
+3.	Run the installer
+		php composer-setup.php
+4.	Remove the installer
+		php -r "unlink('composer-setup.php');"
+5.	To install composer Globally move the downloaded file to /usr/local/bin/composer
+		mv composer.phar /usr/local/bin/composer
+
+### Installing Laravel 
+On Windows 
+:   ```sh
+    composer global require "laravel/installer"
+    ```
+On Linux using local composer.phar
+:    ```sh
+	php composer.phar global require "laravel/installer"
+	```
+
+**Plugin to add laravel framework in netbeans**
+*https://github.com/nbphpcouncil/nb-laravel-plugin/releases*
+
+			
+	
+### Installing java manually
+Download .tar.gz file (preferred to be downloaded from oracle's site)
+```sh
+wget  --no-cookies --no-check-certificate --header "Cookie: gpw_e24=http%3A%2F%2Fwww.oracle.com%2F; oraclelicense=accept-securebackup-cookie" <url>
+```
+
+Extract .tar.gz file in /opt directory
+```sh
+tar -zxvf jdk-*u**-linux-****.tar.gz
+```
+Create symbolic link in order to simplify java updates in future
+```sh
+ln -s /opt/jdk1.8.0_144 /opt/java
+```
+Tell system where java and ts executables are intalled.
+```sh
+update-alternatives --install /usr/bin/java java /opt/java/bin/java 100
+update-alternatives --config java
+```
+Create necessary environment variables
+```sh
+sudo vim /etc/profile.d/java.sh
+```
+```bash
+if ! echo ${PATH} | grep -q /opt/java/bin ; then
+	export PATH=/opt/java/bin:${PATH}
+fi      
+if ! echo ${PATH} | grep -q /opt/java/jre/bin ; then
+   export PATH=/opt/java/jre/bin:${PATH}
+fi      
+export JAVA_HOME=/opt/java
+export JRE_HOME=/opt/java/jre
+export CLASSPATH=.:/opt/java/lib/tools.jar:/opt/java/jre/lib/rt.jar
+```
+```sh
+sudo chmod 755 /etc/profile.d/java.sh
+```
+
+
+### Uninstall a package properly on Ubuntu
+```sh
+sudo apt-get purge git; 
+sudo apt-get autoremove;
+```
+now delete related files if exist in your home directory 
+```sh
+rm ~/.gitconfig
+```
+			
+### Installing postgresql debugger
+Edit postgresql.conf file present in  c:\program files\postgresql\9.3\data directory
+Un-comment or add this line:
+```vi
+shared_preload_libraries = '$libdir/plugin_debugger.dll'
+```
+Restart PostgreSQL server
+In the required database run following command 
+```sql
+create extension pldbgapi;
+```
+		
+
+### Maven download / install sources and javadocs
+Download sources
+```sh
+mvn dependency:sources
+```
+Download docs
+```sh
+mvn dependency:resolve -Dclassifier=javadoc
+```
+Download sources of specific package
+```sh
+mvn dependency:sources -DincludeArtifactIds=guava
+```
+Add plugin in pom.xml
+```pom
+<plugin>
+    <groupId>org.apache.maven.plugins</groupId>
+    <artifactId>maven-eclipse-plugin</artifactId>
+    <configuration>
+        <downloadSources>true</downloadSources>
+        <downloadJavadocs>true</downloadJavadocs>
+    </configuration>
+</plugin>
+```
+
+### Maven run a particular class
+Directly from command line
+:   ```
+    mvn exec:java -Dexec.mainClass="com.example.Main"
+    mvn exec:java -Dexec.mainClass="com.example.Main" -Dexec.args="arg0 arg1"
+    ```
+Using plugin
+:   ```pom
+	<plugin>
+	  <groupId>org.codehaus.mojo</groupId>
+	  <artifactId>exec-maven-plugin</artifactId>
+	  <version>1.2.1</version>
+	  <executions>
+		<execution>
+		  <goals>
+			<goal>java</goal>
+		  </goals>
+		</execution>
+	  </executions>
+	  <configuration>
+		<mainClass>com.example.Main</mainClass>
+		<arguments>
+		  <argument>foo</argument>
+		  <argument>bar</argument>
+		</arguments>
+	  </configuration>
+	</plugin>
+	```
+
+
+### Mongodb on Ubuntu-16.0
+*Reference taken from https://www.howtoforge.com/tutorial/install-mongodb-on-ubuntu-16.04*
+Importing key
+```sh
+sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv EA312927
+```
+Create source list file MongoDB
+```sh
+echo "deb http://repo.mongodb.org/apt/ubuntu "$(lsb_release -sc)"/mongodb-org/3.2 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.2.list
+sudo apt-get install mongodb-org
+```
+Create a new mongodb systemd service file in the '/lib/systemd/system' directory.
+```sh
+cd /lib/systemd/system/
+vim mongod.service
+```
+Now update the systemd service with command below:
+```sh
+systemctl daemon-reload
+```
+Start mongodb and add it as service to be started at boot time:
+```sh
+systemctl start mongod
+systemctl enable mongod
+```
+
+*Further to add mongodb in php*
+```sh
+composer require mongodb/mongodb
+```
+
+
+### Generic runnable/executable file/application as service in ubuntu
+Edit /etc/systemd/system/prometheus.service
+```vi	
+[Unit]
+Description=Prometheus Service
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/prometheus/prometheus --config.file=/usr/local/bin/prometheus/prometheus.yml
+
+[Install]
+WantedBy=multi-user.target 
+```
+```sh
+sudo service prometheus start
+```
+<br>
+<br>
+
+---
+# Setup
+		
+### Disabling lightdm (or other service) 
+1. Method 1
+	```sh
+    echo manual | sudo tee etc/init.d/lightdm.override
+    ```
+	i.e. create <service>.override file to disable it (override it)
+	*This method is not working after 14.0*
+
+2. Method 2 
+	edit /etc/default/grub
+	replace 	GRUB_CMDLINE_LINUX_DEFAULT="quiet splash"
+	with		GRUB_CMDLINE_LINUX_DEFAULT="text"
+	```sh
+    sudo update-grub
+    ```
+
+### Disable ssh login without password
+1.  Edit /etc/ssh/sshd_config and change following settings
+    ```vi
+	ChallengeResponseAuthentication no
+	PasswordAuthentication no
+	UsePAM no
+	```
+	```sh
+	sudo /etc/init.d/ssh reload
+	```
+	
+### Setting git to login wihout password + using ssh in git
+Create ssh-key
+```sh
+ssh-keygen
+```
+Copy your .pub file in remote git application from where you want to connect
+Add your private key using ssh-agent into your system (if you don't want to provide key every time)
+```sh
+ssh-add ~/.ssh/id_rsa
+```
+<br>
+<br>
+
+### Adding git with ssh protocol on windows
+Open git-bash 
+```sh
+ssh-keygen
+vim ~/.bashrc
+```
+Enter following lines in editor
+```vi
+eval `ssh-agent`
+ssh-add
+```
+Restart git-bash
+```sh
+rm ~/.bashrc
+```
+Close git-bash
+RSA public key of ssh is present in .ssh directory inside %userprofile% 
+
+
+### Convert openssh private key to pem format
+```sh
+ssh-keygen -p -N "" -m pem -f /path/to/key
+```
+
+### Analyze which service taken how much time during startup or bootup
+```sh
+systemd-analyze blame
+```
+
+### Linux Sending mail from command line
+MSMTP (SMTP client)
+:   >(Documentation could be found at http://msmtp.sourceforge.net/doc/msmtp.html)
+    
+    ```sh
+	sudo apt-get install msmtp
+    vim ~/.msmtprc
+	```
+	Now in opened editor set default values for all following accounts.
+	```vi
+	# Set default values for all following accounts.
+	defaults
+	auth           on
+	tls            on
+	tls_trust_file /etc/ssl/certs/ca-certificates.crt
+	logfile        ~/.msmtp.log
+
+	# Gmail
+	account        gmail
+	host           smtp.gmail.com
+	port           587
+	from           username@gmail.com
+	user           username
+	password       plain-text-password
+
+	# A freemail service
+	account        freemail
+	host           smtp.freemail.example
+	from           joe_smith@freemail.example
+	...
+
+	# Set a default account
+	account default : gmail
+	```
+
+### Linux fetching mail from command line
+fetchmail (remote-mail retrieval and forwarding utility intended to be used over on-demand TCP/IP)
+`... PENDING ...`
+			
+	
+### Adding ssh client in linux
+```sh
+sudo apt-get install openssh-server
+```
+Create a file **~/.ssh/authorized_keys** if not exist
+```sh
+touch ~/.ssh/authorized_keys
+```
+Append your public key in this file
+```sh
+cat rsa_public_key.pub >> ~/.ssh/authorized_keys
+```
+Now you can access this linux from windows by following command
+```sh
+ssh -i rsa_private_key username@ipaddress
+```
+You can use ssh-keygen to create public private rsa key pair
+
+
+
+### Forcefully disconnect an ssh client
+find process id of ssh for client
+```sh
+sudo netstat -tnpa | grep ssh
+```
+kill process
+```sh
+kill -9 <pid>
+```
+
+
+
+### Logging ssh session   `Important`
+Download log-session script
+```sh
+wget http://www.jms1.net/log-session
+```
+Find out where the sftp-server binary is located
+```sh
+grep sftp /etc/ssh/sshd_config
+```
+Edit log-session file and replace following content
+```sh
+SFTP_SERVER=<location_of_sftp_server>
+SFTP_SERVER=/usr/lib/openssh/sftp-server
+```
+Make log-session file executable
+```sh
+chmod 755 log-session
+```
+Edit ~/.ssh/authorized_keys and append following
+```vi
+command="<location_of_log_session>"
+command="/usr/local/sbin/log-session" ssh-dss AAAAB3Nz...
+```
+
+
+### Securing your password with public key encryption
+Securing your password (or anything for the secure transmission of information between parties) with public key encryption
+Install gnupg
+```sh
+sudo apt-get install gnupg
+```
+Create key pair (give desired inputs and wait until key is created)
+```sh
+gpg --gen-key
+```
+To encrypt 
+```
+<CMD TO O/P> | gpg -e -r <RECIPIENT>
+```
+To decrypt
+```
+<CMD TO O/P> | gpg -d
+```
+To get list of keys
+```
+gpg -k
+```
+To get public key
+`... PENDING ...`
+	
+	
+### Downloading entire site with wget
+```sh
+wget \
+ --recursive \
+ --no-clobber \
+ --page-requisites \
+ --html-extension \
+ --convert-links \
+ --restrict-file-names=windows \
+ --domains website.org \
+ --no-parent \
+     www.website.org/tutorials/html/
+```
+
+### Persist iptables configuration
+install iptables-persistent
+```sh
+sudo apt-get install iptables-persistent
+```
+save iptables configuration with iptables-persistent
+```sh
+sudo iptables-persistent save
+```
+
+### Setting iptables to redirect port (could be used to set wildfly to get request from 80 port)
+```sh
+sudo iptables -A PREROUTING -t nat -p tcp --dport 80 -j REDIRECT --to-port 8080
+```
+
+### Setting iptables to redirect port on local machine
+```sh
+sudo iptables -t nat -I OUTPUT -p tcp -o lo --dport 80 -j REDIRECT --to-ports 8080
+```
+
+	
+### Get linux distribution information
+```sh
+lsb_release -a
+cat /etc/*-release
+uname -a
+cat /proc/version
+```
+
+
+### Compress, zip, extract files directory etc
+```sh
+tar -cvzf <filename_with_.tar.gz_extension> <directory_or_file>
+tar -xvzf <filename_with_.tar.gz_extension> 
+tar -cvzf - <file1> <file2> ... <filen>
+```
+
+### Continue last transaction of package manager like apt-get or yum
+```sh
+yum-complete-transaction [--cleanup-only] 
+yum history redo last
+```
+
+
+### View image from command line
+Using caca to view image with characters
+:   ```sh
+    sudo apt-get install caca-utils
+    cacaview <any_image_.jpg>
+    ```
+
+Using fbi which will use framebuffer
+: ```sh
+    sudo apt-get install fbi
+    fbi <any_image_.jpg>
+    ```
+
+### Creating desktop launcher for an application
+vim /home/$HOME/.local/share/applications/`<application_name>`.desktop
+```vi
+[Desktop Entry]
+Version=1.0
+Name=<Application Name>
+Comment=<e.g. Java IDE>
+Type=Application
+Categories=<e.g. Development;IDE;>
+Exec=<application location e.g. /home/${USERNAME}/applications/eclipse/eclipse>
+Terminal=false
+StartupNotify=true
+Icon=<icon location e.g. /home/${USERNAME}/applications/eclipse/icon.xpm>
+Name[en_US]=<Application Name e.g. Eclipse>
+```
+<br>
+<br>
+
+--- 
+# Installations
+
+### Installation scripts to setup environment 
+alpine setup environment
+```sh
+<<<<<<<<<<<<<<<<<<<<<<<<
+```
+
+### Adding new php version in wamp server
+	
+1.	create new folder [path-to-wamp]/bin/php/php.#.#.# and copy files here
+2. 	copy following files from older php
+	1. php.ini
+	2. phpForApache.ini
+	3. wampserver.conf
+3.	Take snapshots of wamp>PHP>PHP Settings and wamp>PHP>PHP Extendsion
+4.	Open wamp>PHP>php.ini and save it as a backup
+5.	Restart wamp , Change wamp>PHP>Version>latest_version
+6.	Use a diff tool to get differences between old php.ini and new one to satisfy all extensions
+
+		
+### Installing LAMPP
+	
+1.	Install apache web server
+    ```sh
+    sudo apt-get install apache2
+    ```
+	/etc/apache2/apache2.conf contains configurations
+	/etc/apache2/ports.conf contains ports configuration
+2. Install PHP
+    ```sh
+    sudo apt-get install php5 libapache2-mod-php5
+    ```
+    directory for lookup is /var/www/html
+3.	Install mysql
+    ```sh
+    sudo apt-get install mysql-server
+    ```
+	add following lines in /etc/apache2/apache2.conf
+	```vi
+	#phpMyAdmin Configuration
+	Include /etc/phpmyadmin/apache.conf
+	```
+4.	In Ubuntu also need to run following commands to make mcrypt recognized in phpmyadmin/install mcrypt right way
+	```sh
+	php5enmod mcrypt
+	```
+
+### Installing LEMP
+1.  Install nginx 
+    ```sh
+    sudo apt-get install nginx
+    ```
+	Edit /etc/nginx/sites-available/default
+	(If /usr/share/nginx/www does not exist, it's probably called html. Make sure you update your configuration appropriately)
+	1. Add index.php to the index line.
+	2. Change the server_name from local host to your domain name or IP address (replace the example.com in the configuration)
+	3. Change the correct lines in "location ~ \.php$ {" section
+	    ```vi
+		server {
+			listen   80;
+	
+			root /usr/share/nginx/www;
+			index index.php index.html index.htm;
+
+			server_name example.com;
+
+			location / {
+					try_files $uri $uri/ /index.html;
+			}
+
+			error_page 404 /404.html;
+
+			error_page 500 502 503 504 /50x.html;
+			location = /50x.html {
+				  root /usr/share/nginx/www;
+			}
+			
+			# pass the PHP scripts to FastCGI server listening on the php-fpm socket
+			location ~ \.php$ {
+					try_files $uri =404;
+					fastcgi_pass unix:/var/run/php5-fpm.sock;
+					fastcgi_index index.php;
+					fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+					include fastcgi_params;
+					
+			}
+		}
+		```
+		
+2.  Install mysql with php-mysql
+	```sh
+    sudo apt-get install mysql-server php5-mysql
+    ```
+	Activate mysql
+	```sh
+	sudo mysql_install_db
+    ```
+	setup script
+	```sh
+	sudo /usr/bin/mysql_secure_installation
+    ```
+	
+3. 	Install PHP
+    ```sh
+	sudo apt-get install php5-fpm
+	```
+	
+	Configure php
+	Edit php.ini file vim /etc/php5/fpm/php.ini
+    ```vi
+    cgi.fix_pathinfo=0
+    ```
+    
+	Edit /etc/php5/fpm/pool.d/www.conf
+	Find the line, `listen = 127.0.0.1:9000`, and change the `127.0.0.1:9000` to `/var/run/php5-fpm.sock`. 
+	```vi
+	listen = /var/run/php5-fpm.sock
+	```
+	Restart php-fpm
+	```sh
+    sudo service php5-fpm restart
+    ```
+    
+4. Create info.php
+    ```sh
+	sudo nano /usr/share/nginx/html/info.php
+	```
+	```vi
+	<?php
+	phpinfo();
+	?>
+	```
+	restart nginx
+	```sh
+	sudo service nginx restart
+	```
+
+	
+### Installing Composer in Linux
+1. Download the installer to the current directory
+2. Verify the installer SHA-384 either by below command or cross checking at https://composer.github.io/pubkeys.html
+	php -r "if (hash('SHA384', file_get_contents('composer-setup.php')) === 'fd26ce67e3b237fffd5e5544b45b0d92c41a4afe3e3f778e942e43ce6be197b9cdc7c251dcde6e2a52297ea269370680') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); }"
+3.	Run the installer
+		php composer-setup.php
+4.	Remove the installer
+		php -r "unlink('composer-setup.php');"
+5.	To install composer Globally move the downloaded file to /usr/local/bin/composer
+		mv composer.phar /usr/local/bin/composer
+
+### Installing Laravel 
+On Windows 
+:   ```sh
+    composer global require "laravel/installer"
+    ```
+On Linux using local composer.phar
+:    ```sh
+	php composer.phar global require "laravel/installer"
+	```
+
+**Plugin to add laravel framework in netbeans**
+*https://github.com/nbphpcouncil/nb-laravel-plugin/releases*
+
+			
+	
+### Installing java manually
+Download .tar.gz file (preferred to be downloaded from oracle's site)
+```sh
+wget  --no-cookies --no-check-certificate --header "Cookie: gpw_e24=http%3A%2F%2Fwww.oracle.com%2F; oraclelicense=accept-securebackup-cookie" <url>
+```
+
+Extract .tar.gz file in /opt directory
+```sh
+tar -zxvf jdk-*u**-linux-****.tar.gz
+```
+Create symbolic link in order to simplify java updates in future
+```sh
+ln -s /opt/jdk1.8.0_144 /opt/java
+```
+Tell system where java and ts executables are intalled.
+```sh
+update-alternatives --install /usr/bin/java java /opt/java/bin/java 100
+update-alternatives --config java
+```
+Create necessary environment variables
+```sh
+sudo vim /etc/profile.d/java.sh
+```
+```bash
+if ! echo ${PATH} | grep -q /opt/java/bin ; then
+	export PATH=/opt/java/bin:${PATH}
+fi      
+if ! echo ${PATH} | grep -q /opt/java/jre/bin ; then
+   export PATH=/opt/java/jre/bin:${PATH}
+fi      
+export JAVA_HOME=/opt/java
+export JRE_HOME=/opt/java/jre
+export CLASSPATH=.:/opt/java/lib/tools.jar:/opt/java/jre/lib/rt.jar
+```
+```sh
+sudo chmod 755 /etc/profile.d/java.sh
+```
+
+
+### Uninstall a package properly on Ubuntu
+```sh
+sudo apt-get purge git; 
+sudo apt-get autoremove;
+```
+now delete related files if exist in your home directory 
+```sh
+rm ~/.gitconfig
+```
+			
+### Installing postgresql debugger
+Edit postgresql.conf file present in  c:\program files\postgresql\9.3\data directory
+Un-comment or add this line:
+```vi
+shared_preload_libraries = '$libdir/plugin_debugger.dll'
+```
+Restart PostgreSQL server
+In the required database run following command 
+```sql
+create extension pldbgapi;
+```
+		
+
+### Maven download / install sources and javadocs
+Download sources
+```sh
+mvn dependency:sources
+```
+Download docs
+```sh
+mvn dependency:resolve -Dclassifier=javadoc
+```
+Download sources of specific package
+```sh
+mvn dependency:sources -DincludeArtifactIds=guava
+```
+Add plugin in pom.xml
+```pom
+<plugin>
+    <groupId>org.apache.maven.plugins</groupId>
+    <artifactId>maven-eclipse-plugin</artifactId>
+    <configuration>
+        <downloadSources>true</downloadSources>
+        <downloadJavadocs>true</downloadJavadocs>
+    </configuration>
+</plugin>
+```
+
+### Maven run a particular class
+Directly from command line
+:   ```
+    mvn exec:java -Dexec.mainClass="com.example.Main"
+    mvn exec:java -Dexec.mainClass="com.example.Main" -Dexec.args="arg0 arg1"
+    ```
+Using plugin
+:   ```pom
+	<plugin>
+	  <groupId>org.codehaus.mojo</groupId>
+	  <artifactId>exec-maven-plugin</artifactId>
+	  <version>1.2.1</version>
+	  <executions>
+		<execution>
+		  <goals>
+			<goal>java</goal>
+		  </goals>
+		</execution>
+	  </executions>
+	  <configuration>
+		<mainClass>com.example.Main</mainClass>
+		<arguments>
+		  <argument>foo</argument>
+		  <argument>bar</argument>
+		</arguments>
+	  </configuration>
+	</plugin>
+	```
+
+
+### Mongodb on Ubuntu-16.0
+*Reference taken from https://www.howtoforge.com/tutorial/install-mongodb-on-ubuntu-16.04*
+Importing key
+```sh
+sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv EA312927
+```
+Create source list file MongoDB
+```sh
+echo "deb http://repo.mongodb.org/apt/ubuntu "$(lsb_release -sc)"/mongodb-org/3.2 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.2.list
+sudo apt-get install mongodb-org
+```
+Create a new mongodb systemd service file in the '/lib/systemd/system' directory.
+```sh
+cd /lib/systemd/system/
+vim mongod.service
+```
+Now update the systemd service with command below:
+```sh
+systemctl daemon-reload
+```
+Start mongodb and add it as service to be started at boot time:
+```sh
+systemctl start mongod
+systemctl enable mongod
+```
+
+*Further to add mongodb in php*
+```sh
+composer require mongodb/mongodb
+```
+
+
+### Generic runnable/executable file/application as service in ubuntu
+Edit /etc/systemd/system/prometheus.service
+```vi	
+[Unit]
+Description=Prometheus Service
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/prometheus/prometheus --config.file=/usr/local/bin/prometheus/prometheus.yml
+
+[Install]
+WantedBy=multi-user.target 
+```
+```sh
+sudo service prometheus start
+```
+<br>
+<br>
+
+---
+# Setup
+		
+### Disabling lightdm (or other service) 
+1. Method 1
+	```sh
+    echo manual | sudo tee etc/init.d/lightdm.override
+    ```
+	i.e. create <service>.override file to disable it (override it)
+	*This method is not working after 14.0*
+
+2. Method 2 
+	edit /etc/default/grub
+	replace 	GRUB_CMDLINE_LINUX_DEFAULT="quiet splash"
+	with		GRUB_CMDLINE_LINUX_DEFAULT="text"
+	```sh
+    sudo update-grub
+    ```
+
+### Disable ssh login without password
+1.  Edit /etc/ssh/sshd_config and change following settings
+    ```vi
+	ChallengeResponseAuthentication no
+	PasswordAuthentication no
+	UsePAM no
+	```
+	```sh
+	sudo /etc/init.d/ssh reload
+	```
+	
+### Setting git to login wihout password + using ssh in git
+Create ssh-key
+```sh
+ssh-keygen
+```
+Copy your .pub file in remote git application from where you want to connect
+Add your private key using ssh-agent into your system (if you don't want to provide key every time)
+```sh
+ssh-add ~/.ssh/id_rsa
+```
+<br>
+<br>
+
+### Adding git with ssh protocol on windows
+Open git-bash 
+```sh
+ssh-keygen
+vim ~/.bashrc
+```
+Enter following lines in editor
+```vi
+eval `ssh-agent`
+ssh-add
+```
+Restart git-bash
+```sh
+rm ~/.bashrc
+```
+Close git-bash
+RSA public key of ssh is present in .ssh directory inside %userprofile% 
+
+
+### Convert openssh private key to pem format
+```sh
+ssh-keygen -p -N "" -m pem -f /path/to/key
+```
+
+### Analyze which service taken how much time during startup or bootup
+```sh
+systemd-analyze blame
+```
+
+### Linux Sending mail from command line
+MSMTP (SMTP client)
+:   >(Documentation could be found at http://msmtp.sourceforge.net/doc/msmtp.html)
+    
+    ```sh
+	sudo apt-get install msmtp
+    vim ~/.msmtprc
+	```
+	Now in opened editor set default values for all following accounts.
+	```vi
+	# Set default values for all following accounts.
+	defaults
+	auth           on
+	tls            on
+	tls_trust_file /etc/ssl/certs/ca-certificates.crt
+	logfile        ~/.msmtp.log
+
+	# Gmail
+	account        gmail
+	host           smtp.gmail.com
+	port           587
+	from           username@gmail.com
+	user           username
+	password       plain-text-password
+
+	# A freemail service
+	account        freemail
+	host           smtp.freemail.example
+	from           joe_smith@freemail.example
+	...
+
+	# Set a default account
+	account default : gmail
+	```
+
+### Linux fetching mail from command line
+fetchmail (remote-mail retrieval and forwarding utility intended to be used over on-demand TCP/IP)
+`... PENDING ...`
+			
+	
+### Adding ssh client in linux
+```sh
+sudo apt-get install openssh-server
+```
+Create a file **~/.ssh/authorized_keys** if not exist
+```sh
+touch ~/.ssh/authorized_keys
+```
+Append your public key in this file
+```sh
+cat rsa_public_key.pub >> ~/.ssh/authorized_keys
+```
+Now you can access this linux from windows by following command
+```sh
+ssh -i rsa_private_key username@ipaddress
+```
+You can use ssh-keygen to create public private rsa key pair
+
+
+
+### Forcefully disconnect an ssh client
+find process id of ssh for client
+```sh
+sudo netstat -tnpa | grep ssh
+```
+kill process
+```sh
+kill -9 <pid>
+```
+
+
+
+### Logging ssh session   `Important`
+Download log-session script
+```sh
+wget http://www.jms1.net/log-session
+```
+Find out where the sftp-server binary is located
+```sh
+grep sftp /etc/ssh/sshd_config
+```
+Edit log-session file and replace following content
+```sh
+SFTP_SERVER=<location_of_sftp_server>
+SFTP_SERVER=/usr/lib/openssh/sftp-server
+```
+Make log-session file executable
+```sh
+chmod 755 log-session
+```
+Edit ~/.ssh/authorized_keys and append following
+```vi
+command="<location_of_log_session>"
+command="/usr/local/sbin/log-session" ssh-dss AAAAB3Nz...
+```
+
+
+### Securing your password with public key encryption
+Securing your password (or anything for the secure transmission of information between parties) with public key encryption
+Install gnupg
+```sh
+sudo apt-get install gnupg
+```
+Create key pair (give desired inputs and wait until key is created)
+```sh
+gpg --gen-key
+```
+To encrypt 
+```
+<CMD TO O/P> | gpg -e -r <RECIPIENT>
+```
+To decrypt
+```
+<CMD TO O/P> | gpg -d
+```
+To get list of keys
+```
+gpg -k
+```
+To get public key
+`... PENDING ...`
+	
+	
+### Downloading entire site with wget
+```sh
+wget \
+ --recursive \
+ --no-clobber \
+ --page-requisites \
+ --html-extension \
+ --convert-links \
+ --restrict-file-names=windows \
+ --domains website.org \
+ --no-parent \
+     www.website.org/tutorials/html/
+```
+
+### Persist iptables configuration
+install iptables-persistent
+```sh
+sudo apt-get install iptables-persistent
+```
+save iptables configuration with iptables-persistent
+```sh
+sudo iptables-persistent save
+```
+
+### Setting iptables to redirect port (could be used to set wildfly to get request from 80 port)
+```sh
+sudo iptables -A PREROUTING -t nat -p tcp --dport 80 -j REDIRECT --to-port 8080
+```
+
+### Setting iptables to redirect port on local machine
+```sh
+sudo iptables -t nat -I OUTPUT -p tcp -o lo --dport 80 -j REDIRECT --to-ports 8080
+```
+
+	
+### Get linux distribution information
+```sh
+lsb_release -a
+cat /etc/*-release
+uname -a
+cat /proc/version
+```
+
+
+### Compress, zip, extract files directory etc
+```sh
+tar -cvzf <filename_with_.tar.gz_extension> <directory_or_file>
+tar -xvzf <filename_with_.tar.gz_extension> 
+tar -cvzf - <file1> <file2> ... <filen>
+```
+
+### Continue last transaction of package manager like apt-get or yum
+```sh
+yum-complete-transaction [--cleanup-only] 
+yum history redo last
+```
+
+
+### View image from command line
+Using caca to view image with characters
+:   ```sh
+    sudo apt-get install caca-utils
+    cacaview <any_image_.jpg>
+    ```
+
+Using fbi which will use framebuffer
+: ```sh
+    sudo apt-get install fbi
+    fbi <any_image_.jpg>
+    ```
+
+### Creating desktop launcher for an application
+vim /home/$HOME/.local/share/applications/`<application_name>`.desktop
+```vi
+[Desktop Entry]
+Version=1.0
+Name=<Application Name>
+Comment=<e.g. Java IDE>
+Type=Application
+Categories=<e.g. Development;IDE;>
+Exec=<application location e.g. /home/${USERNAME}/applications/eclipse/eclipse>
+Terminal=false
+StartupNotify=true
+Icon=<icon location e.g. /home/${USERNAME}/applications/eclipse/icon.xpm>
+Name[en_US]=<Application Name e.g. Eclipse>
+```
+<br>
+<br>
+
+--- 
+# Installations
+
+### Installation scripts to setup environment 
+alpine setup environment
+```sh
+<<<<<<<<<<<<<<<<<<<<<<<<
+```
+
+### Adding new php version in wamp server
+	
+1.	create new folder [path-to-wamp]/bin/php/php.#.#.# and copy files here
+2. 	copy following files from older php
+	1. php.ini
+	2. phpForApache.ini
+	3. wampserver.conf
+3.	Take snapshots of wamp>PHP>PHP Settings and wamp>PHP>PHP Extendsion
+4.	Open wamp>PHP>php.ini and save it as a backup
+5.	Restart wamp , Change wamp>PHP>Version>latest_version
+6.	Use a diff tool to get differences between old php.ini and new one to satisfy all extensions
+
+		
+### Installing LAMPP
+	
+1.	Install apache web server
+    ```sh
+    sudo apt-get install apache2
+    ```
+	/etc/apache2/apache2.conf contains configurations
+	/etc/apache2/ports.conf contains ports configuration
+2. Install PHP
+    ```sh
+    sudo apt-get install php5 libapache2-mod-php5
+    ```
+    directory for lookup is /var/www/html
+3.	Install mysql
+    ```sh
+    sudo apt-get install mysql-server
+    ```
+	add following lines in /etc/apache2/apache2.conf
+	```vi
+	#phpMyAdmin Configuration
+	Include /etc/phpmyadmin/apache.conf
+	```
+4.	In Ubuntu also need to run following commands to make mcrypt recognized in phpmyadmin/install mcrypt right way
+	```sh
+	php5enmod mcrypt
+	```
+
+### Installing LEMP
+1.  Install nginx 
+    ```sh
+    sudo apt-get install nginx
+    ```
+	Edit /etc/nginx/sites-available/default
+	(If /usr/share/nginx/www does not exist, it's probably called html. Make sure you update your configuration appropriately)
+	1. Add index.php to the index line.
+	2. Change the server_name from local host to your domain name or IP address (replace the example.com in the configuration)
+	3. Change the correct lines in "location ~ \.php$ {" section
+	    ```vi
+		server {
+			listen   80;
+	
+			root /usr/share/nginx/www;
+			index index.php index.html index.htm;
+
+			server_name example.com;
+
+			location / {
+					try_files $uri $uri/ /index.html;
+			}
+
+			error_page 404 /404.html;
+
+			error_page 500 502 503 504 /50x.html;
+			location = /50x.html {
+				  root /usr/share/nginx/www;
+			}
+			
+			# pass the PHP scripts to FastCGI server listening on the php-fpm socket
+			location ~ \.php$ {
+					try_files $uri =404;
+					fastcgi_pass unix:/var/run/php5-fpm.sock;
+					fastcgi_index index.php;
+					fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+					include fastcgi_params;
+					
+			}
+		}
+		```
+		
+2.  Install mysql with php-mysql
+	```sh
+    sudo apt-get install mysql-server php5-mysql
+    ```
+	Activate mysql
+	```sh
+	sudo mysql_install_db
+    ```
+	setup script
+	```sh
+	sudo /usr/bin/mysql_secure_installation
+    ```
+	
+3. 	Install PHP
+    ```sh
+	sudo apt-get install php5-fpm
+	```
+	
+	Configure php
+	Edit php.ini file vim /etc/php5/fpm/php.ini
+    ```vi
+    cgi.fix_pathinfo=0
+    ```
+    
+	Edit /etc/php5/fpm/pool.d/www.conf
+	Find the line, `listen = 127.0.0.1:9000`, and change the `127.0.0.1:9000` to `/var/run/php5-fpm.sock`. 
+	```vi
+	listen = /var/run/php5-fpm.sock
+	```
+	Restart php-fpm
+	```sh
+    sudo service php5-fpm restart
+    ```
+    
+4. Create info.php
+    ```sh
+	sudo nano /usr/share/nginx/html/info.php
+	```
+	```vi
+	<?php
+	phpinfo();
+	?>
+	```
+	restart nginx
+	```sh
+	sudo service nginx restart
+	```
+
+	
+### Installing Composer in Linux
+1. Download the installer to the current directory
+2. Verify the installer SHA-384 either by below command or cross checking at https://composer.github.io/pubkeys.html
+	php -r "if (hash('SHA384', file_get_contents('composer-setup.php')) === 'fd26ce67e3b237fffd5e5544b45b0d92c41a4afe3e3f778e942e43ce6be197b9cdc7c251dcde6e2a52297ea269370680') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); }"
+3.	Run the installer
+		php composer-setup.php
+4.	Remove the installer
+		php -r "unlink('composer-setup.php');"
+5.	To install composer Globally move the downloaded file to /usr/local/bin/composer
+		mv composer.phar /usr/local/bin/composer
+
+### Installing Laravel 
+On Windows 
+:   ```sh
+    composer global require "laravel/installer"
+    ```
+On Linux using local composer.phar
+:    ```sh
+	php composer.phar global require "laravel/installer"
+	```
+
+**Plugin to add laravel framework in netbeans**
+*https://github.com/nbphpcouncil/nb-laravel-plugin/releases*
+
+			
+	
+### Installing java manually
+Download .tar.gz file (preferred to be downloaded from oracle's site)
+```sh
+wget  --no-cookies --no-check-certificate --header "Cookie: gpw_e24=http%3A%2F%2Fwww.oracle.com%2F; oraclelicense=accept-securebackup-cookie" <url>
+```
+
+Extract .tar.gz file in /opt directory
+```sh
+tar -zxvf jdk-*u**-linux-****.tar.gz
+```
+Create symbolic link in order to simplify java updates in future
+```sh
+ln -s /opt/jdk1.8.0_144 /opt/java
+```
+Tell system where java and ts executables are intalled.
+```sh
+update-alternatives --install /usr/bin/java java /opt/java/bin/java 100
+update-alternatives --config java
+```
+Create necessary environment variables
+```sh
+sudo vim /etc/profile.d/java.sh
+```
+```bash
+if ! echo ${PATH} | grep -q /opt/java/bin ; then
+	export PATH=/opt/java/bin:${PATH}
+fi      
+if ! echo ${PATH} | grep -q /opt/java/jre/bin ; then
+   export PATH=/opt/java/jre/bin:${PATH}
+fi      
+export JAVA_HOME=/opt/java
+export JRE_HOME=/opt/java/jre
+export CLASSPATH=.:/opt/java/lib/tools.jar:/opt/java/jre/lib/rt.jar
+```
+```sh
+sudo chmod 755 /etc/profile.d/java.sh
+```
+
+
+### Uninstall a package properly on Ubuntu
+```sh
+sudo apt-get purge git; 
+sudo apt-get autoremove;
+```
+now delete related files if exist in your home directory 
+```sh
+rm ~/.gitconfig
+```
+			
+### Installing postgresql debugger
+Edit postgresql.conf file present in  c:\program files\postgresql\9.3\data directory
+Un-comment or add this line:
+```vi
+shared_preload_libraries = '$libdir/plugin_debugger.dll'
+```
+Restart PostgreSQL server
+In the required database run following command 
+```sql
+create extension pldbgapi;
+```
+		
+
+### Maven download / install sources and javadocs
+Download sources
+```sh
+mvn dependency:sources
+```
+Download docs
+```sh
+mvn dependency:resolve -Dclassifier=javadoc
+```
+Download sources of specific package
+```sh
+mvn dependency:sources -DincludeArtifactIds=guava
+```
+Add plugin in pom.xml
+```pom
+<plugin>
+    <groupId>org.apache.maven.plugins</groupId>
+    <artifactId>maven-eclipse-plugin</artifactId>
+    <configuration>
+        <downloadSources>true</downloadSources>
+        <downloadJavadocs>true</downloadJavadocs>
+    </configuration>
+</plugin>
+```
+
+### Maven run a particular class
+Directly from command line
+:   ```
+    mvn exec:java -Dexec.mainClass="com.example.Main"
+    mvn exec:java -Dexec.mainClass="com.example.Main" -Dexec.args="arg0 arg1"
+    ```
+Using plugin
+:   ```pom
+	<plugin>
+	  <groupId>org.codehaus.mojo</groupId>
+	  <artifactId>exec-maven-plugin</artifactId>
+	  <version>1.2.1</version>
+	  <executions>
+		<execution>
+		  <goals>
+			<goal>java</goal>
+		  </goals>
+		</execution>
+	  </executions>
+	  <configuration>
+		<mainClass>com.example.Main</mainClass>
+		<arguments>
+		  <argument>foo</argument>
+		  <argument>bar</argument>
+		</arguments>
+	  </configuration>
+	</plugin>
+	```
+
+
+### Mongodb on Ubuntu-16.0
+*Reference taken from https://www.howtoforge.com/tutorial/install-mongodb-on-ubuntu-16.04*
+Importing key
+```sh
+sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv EA312927
+```
+Create source list file MongoDB
+```sh
+echo "deb http://repo.mongodb.org/apt/ubuntu "$(lsb_release -sc)"/mongodb-org/3.2 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.2.list
+sudo apt-get install mongodb-org
+```
+Create a new mongodb systemd service file in the '/lib/systemd/system' directory.
+```sh
+cd /lib/systemd/system/
+vim mongod.service
+```
+Now update the systemd service with command below:
+```sh
+systemctl daemon-reload
+```
+Start mongodb and add it as service to be started at boot time:
+```sh
+systemctl start mongod
+systemctl enable mongod
+```
+
+*Further to add mongodb in php*
+```sh
+composer require mongodb/mongodb
+```
+
+
+### Generic runnable/executable file/application as service in ubuntu
+Edit /etc/systemd/system/prometheus.service
+```vi	
+[Unit]
+Description=Prometheus Service
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/prometheus/prometheus --config.file=/usr/local/bin/prometheus/prometheus.yml
+
+[Install]
+WantedBy=multi-user.target 
+```
+```sh
+sudo service prometheus start
+```
+<br>
+<br>
+
+---
+# Setup
+		
+### Disabling lightdm (or other service) 
+1. Method 1
+	```sh
+    echo manual | sudo tee etc/init.d/lightdm.override
+    ```
+	i.e. create <service>.override file to disable it (override it)
+	*This method is not working after 14.0*
+
+2. Method 2 
+	edit /etc/default/grub
+	replace 	GRUB_CMDLINE_LINUX_DEFAULT="quiet splash"
+	with		GRUB_CMDLINE_LINUX_DEFAULT="text"
+	```sh
+    sudo update-grub
+    ```
+
+### Disable ssh login without password
+1.  Edit /etc/ssh/sshd_config and change following settings
+    ```vi
+	ChallengeResponseAuthentication no
+	PasswordAuthentication no
+	UsePAM no
+	```
+	```sh
+	sudo /etc/init.d/ssh reload
+	```
+	
+### Setting git to login wihout password + using ssh in git
+Create ssh-key
+```sh
+ssh-keygen
+```
+Copy your .pub file in remote git application from where you want to connect
+Add your private key using ssh-agent into your system (if you don't want to provide key every time)
+```sh
+ssh-add ~/.ssh/id_rsa
+```
+<br>
+<br>
+
+### Adding git with ssh protocol on windows
+Open git-bash 
+```sh
+ssh-keygen
+vim ~/.bashrc
+```
+Enter following lines in editor
+```vi
+eval `ssh-agent`
+ssh-add
+```
+Restart git-bash
+```sh
+rm ~/.bashrc
+```
+Close git-bash
+RSA public key of ssh is present in .ssh directory inside %userprofile% 
+
+
+### Convert openssh private key to pem format
+```sh
+ssh-keygen -p -N "" -m pem -f /path/to/key
+```
+
+### Analyze which service taken how much time during startup or bootup
+```sh
+systemd-analyze blame
+```
+
+### Linux Sending mail from command line
+MSMTP (SMTP client)
+:   >(Documentation could be found at http://msmtp.sourceforge.net/doc/msmtp.html)
+    
+    ```sh
+	sudo apt-get install msmtp
+    vim ~/.msmtprc
+	```
+	Now in opened editor set default values for all following accounts.
+	```vi
+	# Set default values for all following accounts.
+	defaults
+	auth           on
+	tls            on
+	tls_trust_file /etc/ssl/certs/ca-certificates.crt
+	logfile        ~/.msmtp.log
+
+	# Gmail
+	account        gmail
+	host           smtp.gmail.com
+	port           587
+	from           username@gmail.com
+	user           username
+	password       plain-text-password
+
+	# A freemail service
+	account        freemail
+	host           smtp.freemail.example
+	from           joe_smith@freemail.example
+	...
+
+	# Set a default account
+	account default : gmail
+	```
+
+### Linux fetching mail from command line
+fetchmail (remote-mail retrieval and forwarding utility intended to be used over on-demand TCP/IP)
+`... PENDING ...`
+			
+	
+### Adding ssh client in linux
+```sh
+sudo apt-get install openssh-server
+```
+Create a file **~/.ssh/authorized_keys** if not exist
+```sh
+touch ~/.ssh/authorized_keys
+```
+Append your public key in this file
+```sh
+cat rsa_public_key.pub >> ~/.ssh/authorized_keys
+```
+Now you can access this linux from windows by following command
+```sh
+ssh -i rsa_private_key username@ipaddress
+```
+You can use ssh-keygen to create public private rsa key pair
+
+
+
+### Forcefully disconnect an ssh client
+find process id of ssh for client
+```sh
+sudo netstat -tnpa | grep ssh
+```
+kill process
+```sh
+kill -9 <pid>
+```
+
+
+
+### Logging ssh session   `Important`
+Download log-session script
+```sh
+wget http://www.jms1.net/log-session
+```
+Find out where the sftp-server binary is located
+```sh
+grep sftp /etc/ssh/sshd_config
+```
+Edit log-session file and replace following content
+```sh
+SFTP_SERVER=<location_of_sftp_server>
+SFTP_SERVER=/usr/lib/openssh/sftp-server
+```
+Make log-session file executable
+```sh
+chmod 755 log-session
+```
+Edit ~/.ssh/authorized_keys and append following
+```vi
+command="<location_of_log_session>"
+command="/usr/local/sbin/log-session" ssh-dss AAAAB3Nz...
+```
+
+
+### Securing your password with public key encryption
+Securing your password (or anything for the secure transmission of information between parties) with public key encryption
+Install gnupg
+```sh
+sudo apt-get install gnupg
+```
+Create key pair (give desired inputs and wait until key is created)
+```sh
+gpg --gen-key
+```
+To encrypt 
+```
+<CMD TO O/P> | gpg -e -r <RECIPIENT>
+```
+To decrypt
+```
+<CMD TO O/P> | gpg -d
+```
+To get list of keys
+```
+gpg -k
+```
+To get public key
+`... PENDING ...`
+	
+	
+### Downloading entire site with wget
+```sh
+wget \
+ --recursive \
+ --no-clobber \
+ --page-requisites \
+ --html-extension \
+ --convert-links \
+ --restrict-file-names=windows \
+ --domains website.org \
+ --no-parent \
+     www.website.org/tutorials/html/
+```
+
+### Persist iptables configuration
+install iptables-persistent
+```sh
+sudo apt-get install iptables-persistent
+```
+save iptables configuration with iptables-persistent
+```sh
+sudo iptables-persistent save
+```
+
+### Setting iptables to redirect port (could be used to set wildfly to get request from 80 port)
+```sh
+sudo iptables -A PREROUTING -t nat -p tcp --dport 80 -j REDIRECT --to-port 8080
+```
+
+### Setting iptables to redirect port on local machine
+```sh
+sudo iptables -t nat -I OUTPUT -p tcp -o lo --dport 80 -j REDIRECT --to-ports 8080
+```
+
+	
+### Get linux distribution information
+```sh
+lsb_release -a
+cat /etc/*-release
+uname -a
+cat /proc/version
+```
+
+
+### Compress, zip, extract files directory etc
+```sh
+tar -cvzf <filename_with_.tar.gz_extension> <directory_or_file>
+tar -xvzf <filename_with_.tar.gz_extension> 
+tar -cvzf - <file1> <file2> ... <filen>
+```
+
+### Continue last transaction of package manager like apt-get or yum
+```sh
+yum-complete-transaction [--cleanup-only] 
+yum history redo last
+```
+
+
+### View image from command line
+Using caca to view image with characters
+:   ```sh
+    sudo apt-get install caca-utils
+    cacaview <any_image_.jpg>
+    ```
+
+Using fbi which will use framebuffer
+: ```sh
+    sudo apt-get install fbi
+    fbi <any_image_.jpg>
+    ```
+
+### Creating desktop launcher for an application
+vim /home/$HOME/.local/share/applications/`<application_name>`.desktop
+```vi
+[Desktop Entry]
+Version=1.0
+Name=<Application Name>
+Comment=<e.g. Java IDE>
+Type=Application
+Categories=<e.g. Development;IDE;>
+Exec=<application location e.g. /home/${USERNAME}/applications/eclipse/eclipse>
+Terminal=false
+StartupNotify=true
+Icon=<icon location e.g. /home/${USERNAME}/applications/eclipse/icon.xpm>
+Name[en_US]=<Application Name e.g. Eclipse>
+```
+<br>
+<br>
+
+--- 
+# Installations
+
+### Installation scripts to setup environment 
+alpine setup environment
+```sh
+<<<<<<<<<<<<<<<<<<<<<<<<
+```
+
+### Adding new php version in wamp server
+	
+1.	create new folder [path-to-wamp]/bin/php/php.#.#.# and copy files here
+2. 	copy following files from older php
+	1. php.ini
+	2. phpForApache.ini
+	3. wampserver.conf
+3.	Take snapshots of wamp>PHP>PHP Settings and wamp>PHP>PHP Extendsion
+4.	Open wamp>PHP>php.ini and save it as a backup
+5.	Restart wamp , Change wamp>PHP>Version>latest_version
+6.	Use a diff tool to get differences between old php.ini and new one to satisfy all extensions
+
+		
+### Installing LAMPP
+	
+1.	Install apache web server
+    ```sh
+    sudo apt-get install apache2
+    ```
+	/etc/apache2/apache2.conf contains configurations
+	/etc/apache2/ports.conf contains ports configuration
+2. Install PHP
+    ```sh
+    sudo apt-get install php5 libapache2-mod-php5
+    ```
+    directory for lookup is /var/www/html
+3.	Install mysql
+    ```sh
+    sudo apt-get install mysql-server
+    ```
+	add following lines in /etc/apache2/apache2.conf
+	```vi
+	#phpMyAdmin Configuration
+	Include /etc/phpmyadmin/apache.conf
+	```
+4.	In Ubuntu also need to run following commands to make mcrypt recognized in phpmyadmin/install mcrypt right way
+	```sh
+	php5enmod mcrypt
+	```
+
+### Installing LEMP
+1.  Install nginx 
+    ```sh
+    sudo apt-get install nginx
+    ```
+	Edit /etc/nginx/sites-available/default
+	(If /usr/share/nginx/www does not exist, it's probably called html. Make sure you update your configuration appropriately)
+	1. Add index.php to the index line.
+	2. Change the server_name from local host to your domain name or IP address (replace the example.com in the configuration)
+	3. Change the correct lines in "location ~ \.php$ {" section
+	    ```vi
+		server {
+			listen   80;
+	
+			root /usr/share/nginx/www;
+			index index.php index.html index.htm;
+
+			server_name example.com;
+
+			location / {
+					try_files $uri $uri/ /index.html;
+			}
+
+			error_page 404 /404.html;
+
+			error_page 500 502 503 504 /50x.html;
+			location = /50x.html {
+				  root /usr/share/nginx/www;
+			}
+			
+			# pass the PHP scripts to FastCGI server listening on the php-fpm socket
+			location ~ \.php$ {
+					try_files $uri =404;
+					fastcgi_pass unix:/var/run/php5-fpm.sock;
+					fastcgi_index index.php;
+					fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+					include fastcgi_params;
+					
+			}
+		}
+		```
+		
+2.  Install mysql with php-mysql
+	```sh
+    sudo apt-get install mysql-server php5-mysql
+    ```
+	Activate mysql
+	```sh
+	sudo mysql_install_db
+    ```
+	setup script
+	```sh
+	sudo /usr/bin/mysql_secure_installation
+    ```
+	
+3. 	Install PHP
+    ```sh
+	sudo apt-get install php5-fpm
+	```
+	
+	Configure php
+	Edit php.ini file vim /etc/php5/fpm/php.ini
+    ```vi
+    cgi.fix_pathinfo=0
+    ```
+    
+	Edit /etc/php5/fpm/pool.d/www.conf
+	Find the line, `listen = 127.0.0.1:9000`, and change the `127.0.0.1:9000` to `/var/run/php5-fpm.sock`. 
+	```vi
+	listen = /var/run/php5-fpm.sock
+	```
+	Restart php-fpm
+	```sh
+    sudo service php5-fpm restart
+    ```
+    
+4. Create info.php
+    ```sh
+	sudo nano /usr/share/nginx/html/info.php
+	```
+	```vi
+	<?php
+	phpinfo();
+	?>
+	```
+	restart nginx
+	```sh
+	sudo service nginx restart
+	```
+
+	
+### Installing Composer in Linux
+1. Download the installer to the current directory
+2. Verify the installer SHA-384 either by below command or cross checking at https://composer.github.io/pubkeys.html
+	php -r "if (hash('SHA384', file_get_contents('composer-setup.php')) === 'fd26ce67e3b237fffd5e5544b45b0d92c41a4afe3e3f778e942e43ce6be197b9cdc7c251dcde6e2a52297ea269370680') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); }"
+3.	Run the installer
+		php composer-setup.php
+4.	Remove the installer
+		php -r "unlink('composer-setup.php');"
+5.	To install composer Globally move the downloaded file to /usr/local/bin/composer
+		mv composer.phar /usr/local/bin/composer
+
+### Installing Laravel 
+On Windows 
+:   ```sh
+    composer global require "laravel/installer"
+    ```
+On Linux using local composer.phar
+:    ```sh
+	php composer.phar global require "laravel/installer"
+	```
+
+**Plugin to add laravel framework in netbeans**
+*https://github.com/nbphpcouncil/nb-laravel-plugin/releases*
+
+			
+	
+### Installing java manually
+Download .tar.gz file (preferred to be downloaded from oracle's site)
+```sh
+wget  --no-cookies --no-check-certificate --header "Cookie: gpw_e24=http%3A%2F%2Fwww.oracle.com%2F; oraclelicense=accept-securebackup-cookie" <url>
+```
+
+Extract .tar.gz file in /opt directory
+```sh
+tar -zxvf jdk-*u**-linux-****.tar.gz
+```
+Create symbolic link in order to simplify java updates in future
+```sh
+ln -s /opt/jdk1.8.0_144 /opt/java
+```
+Tell system where java and ts executables are intalled.
+```sh
+update-alternatives --install /usr/bin/java java /opt/java/bin/java 100
+update-alternatives --config java
+```
+Create necessary environment variables
+```sh
+sudo vim /etc/profile.d/java.sh
+```
+```bash
+if ! echo ${PATH} | grep -q /opt/java/bin ; then
+	export PATH=/opt/java/bin:${PATH}
+fi      
+if ! echo ${PATH} | grep -q /opt/java/jre/bin ; then
+   export PATH=/opt/java/jre/bin:${PATH}
+fi      
+export JAVA_HOME=/opt/java
+export JRE_HOME=/opt/java/jre
+export CLASSPATH=.:/opt/java/lib/tools.jar:/opt/java/jre/lib/rt.jar
+```
+```sh
+sudo chmod 755 /etc/profile.d/java.sh
+```
+
+
+### Uninstall a package properly on Ubuntu
+```sh
+sudo apt-get purge git; 
+sudo apt-get autoremove;
+```
+now delete related files if exist in your home directory 
+```sh
+rm ~/.gitconfig
+```
+			
+### Installing postgresql debugger
+Edit postgresql.conf file present in  c:\program files\postgresql\9.3\data directory
+Un-comment or add this line:
+```vi
+shared_preload_libraries = '$libdir/plugin_debugger.dll'
+```
+Restart PostgreSQL server
+In the required database run following command 
+```sql
+create extension pldbgapi;
+```
+		
+
+### Maven download / install sources and javadocs
+Download sources
+```sh
+mvn dependency:sources
+```
+Download docs
+```sh
+mvn dependency:resolve -Dclassifier=javadoc
+```
+Download sources of specific package
+```sh
+mvn dependency:sources -DincludeArtifactIds=guava
+```
+Add plugin in pom.xml
+```pom
+<plugin>
+    <groupId>org.apache.maven.plugins</groupId>
+    <artifactId>maven-eclipse-plugin</artifactId>
+    <configuration>
+        <downloadSources>true</downloadSources>
+        <downloadJavadocs>true</downloadJavadocs>
+    </configuration>
+</plugin>
+```
+
+### Maven run a particular class
+Directly from command line
+:   ```
+    mvn exec:java -Dexec.mainClass="com.example.Main"
+    mvn exec:java -Dexec.mainClass="com.example.Main" -Dexec.args="arg0 arg1"
+    ```
+Using plugin
+:   ```pom
+	<plugin>
+	  <groupId>org.codehaus.mojo</groupId>
+	  <artifactId>exec-maven-plugin</artifactId>
+	  <version>1.2.1</version>
+	  <executions>
+		<execution>
+		  <goals>
+			<goal>java</goal>
+		  </goals>
+		</execution>
+	  </executions>
+	  <configuration>
+		<mainClass>com.example.Main</mainClass>
+		<arguments>
+		  <argument>foo</argument>
+		  <argument>bar</argument>
+		</arguments>
+	  </configuration>
+	</plugin>
+	```
+
+
+### Mongodb on Ubuntu-16.0
+*Reference taken from https://www.howtoforge.com/tutorial/install-mongodb-on-ubuntu-16.04*
+Importing key
+```sh
+sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv EA312927
+```
+Create source list file MongoDB
+```sh
+echo "deb http://repo.mongodb.org/apt/ubuntu "$(lsb_release -sc)"/mongodb-org/3.2 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.2.list
+sudo apt-get install mongodb-org
+```
+Create a new mongodb systemd service file in the '/lib/systemd/system' directory.
+```sh
+cd /lib/systemd/system/
+vim mongod.service
+```
+Now update the systemd service with command below:
+```sh
+systemctl daemon-reload
+```
+Start mongodb and add it as service to be started at boot time:
+```sh
+systemctl start mongod
+systemctl enable mongod
+```
+
+*Further to add mongodb in php*
+```sh
+composer require mongodb/mongodb
+```
+
+
+### Generic runnable/executable file/application as service in ubuntu
+Edit /etc/systemd/system/prometheus.service
+```vi	
+[Unit]
+Description=Prometheus Service
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/prometheus/prometheus --config.file=/usr/local/bin/prometheus/prometheus.yml
+
+[Install]
+WantedBy=multi-user.target 
+```
+```sh
+sudo service prometheus start
+```
+<br>
+<br>
+
+---
+# Setup
+		
+### Disabling lightdm (or other service) 
+1. Method 1
+	```sh
+    echo manual | sudo tee etc/init.d/lightdm.override
+    ```
+	i.e. create <service>.override file to disable it (override it)
+	*This method is not working after 14.0*
+
+2. Method 2 
+	edit /etc/default/grub
+	replace 	GRUB_CMDLINE_LINUX_DEFAULT="quiet splash"
+	with		GRUB_CMDLINE_LINUX_DEFAULT="text"
+	```sh
+    sudo update-grub
+    ```
+
+### Disable ssh login without password
+1.  Edit /etc/ssh/sshd_config and change following settings
+    ```vi
+	ChallengeResponseAuthentication no
+	PasswordAuthentication no
+	UsePAM no
+	```
+	```sh
+	sudo /etc/init.d/ssh reload
+	```
+	
+### Setting git to login wihout password + using ssh in git
+Create ssh-key
+```sh
+ssh-keygen
+```
+Copy your .pub file in remote git application from where you want to connect
+Add your private key using ssh-agent into your system (if you don't want to provide key every time)
+```sh
+ssh-add ~/.ssh/id_rsa
+```
+<br>
+<br>
+
+### Adding git with ssh protocol on windows
+Open git-bash 
+```sh
+ssh-keygen
+vim ~/.bashrc
+```
+Enter following lines in editor
+```vi
+eval `ssh-agent`
+ssh-add
+```
+Restart git-bash
+```sh
+rm ~/.bashrc
+```
+Close git-bash
+RSA public key of ssh is present in .ssh directory inside %userprofile% 
+
+
+### Convert openssh private key to pem format
+```sh
+ssh-keygen -p -N "" -m pem -f /path/to/key
+```
+
+### Analyze which service taken how much time during startup or bootup
+```sh
+systemd-analyze blame
+```
+
+### Linux Sending mail from command line
+MSMTP (SMTP client)
+:   >(Documentation could be found at http://msmtp.sourceforge.net/doc/msmtp.html)
+    
+    ```sh
+	sudo apt-get install msmtp
+    vim ~/.msmtprc
+	```
+	Now in opened editor set default values for all following accounts.
+	```vi
+	# Set default values for all following accounts.
+	defaults
+	auth           on
+	tls            on
+	tls_trust_file /etc/ssl/certs/ca-certificates.crt
+	logfile        ~/.msmtp.log
+
+	# Gmail
+	account        gmail
+	host           smtp.gmail.com
+	port           587
+	from           username@gmail.com
+	user           username
+	password       plain-text-password
+
+	# A freemail service
+	account        freemail
+	host           smtp.freemail.example
+	from           joe_smith@freemail.example
+	...
+
+	# Set a default account
+	account default : gmail
+	```
+
+### Linux fetching mail from command line
+fetchmail (remote-mail retrieval and forwarding utility intended to be used over on-demand TCP/IP)
+`... PENDING ...`
+			
+	
+### Adding ssh client in linux
+```sh
+sudo apt-get install openssh-server
+```
+Create a file **~/.ssh/authorized_keys** if not exist
+```sh
+touch ~/.ssh/authorized_keys
+```
+Append your public key in this file
+```sh
+cat rsa_public_key.pub >> ~/.ssh/authorized_keys
+```
+Now you can access this linux from windows by following command
+```sh
+ssh -i rsa_private_key username@ipaddress
+```
+You can use ssh-keygen to create public private rsa key pair
+
+
+
+### Forcefully disconnect an ssh client
+find process id of ssh for client
+```sh
+sudo netstat -tnpa | grep ssh
+```
+kill process
+```sh
+kill -9 <pid>
+```
+
+
+
+### Logging ssh session   `Important`
+Download log-session script
+```sh
+wget http://www.jms1.net/log-session
+```
+Find out where the sftp-server binary is located
+```sh
+grep sftp /etc/ssh/sshd_config
+```
+Edit log-session file and replace following content
+```sh
+SFTP_SERVER=<location_of_sftp_server>
+SFTP_SERVER=/usr/lib/openssh/sftp-server
+```
+Make log-session file executable
+```sh
+chmod 755 log-session
+```
+Edit ~/.ssh/authorized_keys and append following
+```vi
+command="<location_of_log_session>"
+command="/usr/local/sbin/log-session" ssh-dss AAAAB3Nz...
+```
+
+
+### Securing your password with public key encryption
+Securing your password (or anything for the secure transmission of information between parties) with public key encryption
+Install gnupg
+```sh
+sudo apt-get install gnupg
+```
+Create key pair (give desired inputs and wait until key is created)
+```sh
+gpg --gen-key
+```
+To encrypt 
+```
+<CMD TO O/P> | gpg -e -r <RECIPIENT>
+```
+To decrypt
+```
+<CMD TO O/P> | gpg -d
+```
+To get list of keys
+```
+gpg -k
+```
+To get public key
+`... PENDING ...`
+	
+	
+### Downloading entire site with wget
+```sh
+wget \
+ --recursive \
+ --no-clobber \
+ --page-requisites \
+ --html-extension \
+ --convert-links \
+ --restrict-file-names=windows \
+ --domains website.org \
+ --no-parent \
+     www.website.org/tutorials/html/
+```
+
+### Persist iptables configuration
+install iptables-persistent
+```sh
+sudo apt-get install iptables-persistent
+```
+save iptables configuration with iptables-persistent
+```sh
+sudo iptables-persistent save
+```
+
+### Setting iptables to redirect port (could be used to set wildfly to get request from 80 port)
+```sh
+sudo iptables -A PREROUTING -t nat -p tcp --dport 80 -j REDIRECT --to-port 8080
+```
+
+### Setting iptables to redirect port on local machine
+```sh
+sudo iptables -t nat -I OUTPUT -p tcp -o lo --dport 80 -j REDIRECT --to-ports 8080
+```
+
+	
+### Get linux distribution information
+```sh
+lsb_release -a
+cat /etc/*-release
+uname -a
+cat /proc/version
+```
+
+
+### Compress, zip, extract files directory etc
+```sh
+tar -cvzf <filename_with_.tar.gz_extension> <directory_or_file>
+tar -xvzf <filename_with_.tar.gz_extension> 
+tar -cvzf - <file1> <file2> ... <filen>
+```
+
+### Continue last transaction of package manager like apt-get or yum
+```sh
+yum-complete-transaction [--cleanup-only] 
+yum history redo last
+```
+
+
+### View image from command line
+Using caca to view image with characters
+:   ```sh
+    sudo apt-get install caca-utils
+    cacaview <any_image_.jpg>
+    ```
+
+Using fbi which will use framebuffer
+: ```sh
+    sudo apt-get install fbi
+    fbi <any_image_.jpg>
+    ```
+
+### Creating desktop launcher for an application
+vim /home/$HOME/.local/share/applications/`<application_name>`.desktop
+```vi
+[Desktop Entry]
+Version=1.0
+Name=<Application Name>
+Comment=<e.g. Java IDE>
+Type=Application
+Categories=<e.g. Development;IDE;>
+Exec=<application location e.g. /home/${USERNAME}/applications/eclipse/eclipse>
+Terminal=false
+StartupNotify=true
+Icon=<icon location e.g. /home/${USERNAME}/applications/eclipse/icon.xpm>
+Name[en_US]=<Application Name e.g. Eclipse>
+```
+<br>
+<br>
+
+--- 
+# Installations
+
+### Installation scripts to setup environment 
+alpine setup environment
+```sh
+<<<<<<<<<<<<<<<<<<<<<<<<
+```
+
+### Adding new php version in wamp server
+	
+1.	create new folder [path-to-wamp]/bin/php/php.#.#.# and copy files here
+2. 	copy following files from older php
+	1. php.ini
+	2. phpForApache.ini
+	3. wampserver.conf
+3.	Take snapshots of wamp>PHP>PHP Settings and wamp>PHP>PHP Extendsion
+4.	Open wamp>PHP>php.ini and save it as a backup
+5.	Restart wamp , Change wamp>PHP>Version>latest_version
+6.	Use a diff tool to get differences between old php.ini and new one to satisfy all extensions
+
+		
+### Installing LAMPP
+	
+1.	Install apache web server
+    ```sh
+    sudo apt-get install apache2
+    ```
+	/etc/apache2/apache2.conf contains configurations
+	/etc/apache2/ports.conf contains ports configuration
+2. Install PHP
+    ```sh
+    sudo apt-get install php5 libapache2-mod-php5
+    ```
+    directory for lookup is /var/www/html
+3.	Install mysql
+    ```sh
+    sudo apt-get install mysql-server
+    ```
+	add following lines in /etc/apache2/apache2.conf
+	```vi
+	#phpMyAdmin Configuration
+	Include /etc/phpmyadmin/apache.conf
+	```
+4.	In Ubuntu also need to run following commands to make mcrypt recognized in phpmyadmin/install mcrypt right way
+	```sh
+	php5enmod mcrypt
+	```
+
+### Installing LEMP
+1.  Install nginx 
+    ```sh
+    sudo apt-get install nginx
+    ```
+	Edit /etc/nginx/sites-available/default
+	(If /usr/share/nginx/www does not exist, it's probably called html. Make sure you update your configuration appropriately)
+	1. Add index.php to the index line.
+	2. Change the server_name from local host to your domain name or IP address (replace the example.com in the configuration)
+	3. Change the correct lines in "location ~ \.php$ {" section
+	    ```vi
+		server {
+			listen   80;
+	
+			root /usr/share/nginx/www;
+			index index.php index.html index.htm;
+
+			server_name example.com;
+
+			location / {
+					try_files $uri $uri/ /index.html;
+			}
+
+			error_page 404 /404.html;
+
+			error_page 500 502 503 504 /50x.html;
+			location = /50x.html {
+				  root /usr/share/nginx/www;
+			}
+			
+			# pass the PHP scripts to FastCGI server listening on the php-fpm socket
+			location ~ \.php$ {
+					try_files $uri =404;
+					fastcgi_pass unix:/var/run/php5-fpm.sock;
+					fastcgi_index index.php;
+					fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+					include fastcgi_params;
+					
+			}
+		}
+		```
+		
+2.  Install mysql with php-mysql
+	```sh
+    sudo apt-get install mysql-server php5-mysql
+    ```
+	Activate mysql
+	```sh
+	sudo mysql_install_db
+    ```
+	setup script
+	```sh
+	sudo /usr/bin/mysql_secure_installation
+    ```
+	
+3. 	Install PHP
+    ```sh
+	sudo apt-get install php5-fpm
+	```
+	
+	Configure php
+	Edit php.ini file vim /etc/php5/fpm/php.ini
+    ```vi
+    cgi.fix_pathinfo=0
+    ```
+    
+	Edit /etc/php5/fpm/pool.d/www.conf
+	Find the line, `listen = 127.0.0.1:9000`, and change the `127.0.0.1:9000` to `/var/run/php5-fpm.sock`. 
+	```vi
+	listen = /var/run/php5-fpm.sock
+	```
+	Restart php-fpm
+	```sh
+    sudo service php5-fpm restart
+    ```
+    
+4. Create info.php
+    ```sh
+	sudo nano /usr/share/nginx/html/info.php
+	```
+	```vi
+	<?php
+	phpinfo();
+	?>
+	```
+	restart nginx
+	```sh
+	sudo service nginx restart
+	```
+
+	
+### Installing Composer in Linux
+1. Download the installer to the current directory
+2. Verify the installer SHA-384 either by below command or cross checking at https://composer.github.io/pubkeys.html
+	php -r "if (hash('SHA384', file_get_contents('composer-setup.php')) === 'fd26ce67e3b237fffd5e5544b45b0d92c41a4afe3e3f778e942e43ce6be197b9cdc7c251dcde6e2a52297ea269370680') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); }"
+3.	Run the installer
+		php composer-setup.php
+4.	Remove the installer
+		php -r "unlink('composer-setup.php');"
+5.	To install composer Globally move the downloaded file to /usr/local/bin/composer
+		mv composer.phar /usr/local/bin/composer
+
+### Installing Laravel 
+On Windows 
+:   ```sh
+    composer global require "laravel/installer"
+    ```
+On Linux using local composer.phar
+:    ```sh
+	php composer.phar global require "laravel/installer"
+	```
+
+**Plugin to add laravel framework in netbeans**
+*https://github.com/nbphpcouncil/nb-laravel-plugin/releases*
+
+			
+	
+### Installing java manually
+Download .tar.gz file (preferred to be downloaded from oracle's site)
+```sh
+wget  --no-cookies --no-check-certificate --header "Cookie: gpw_e24=http%3A%2F%2Fwww.oracle.com%2F; oraclelicense=accept-securebackup-cookie" <url>
+```
+
+Extract .tar.gz file in /opt directory
+```sh
+tar -zxvf jdk-*u**-linux-****.tar.gz
+```
+Create symbolic link in order to simplify java updates in future
+```sh
+ln -s /opt/jdk1.8.0_144 /opt/java
+```
+Tell system where java and ts executables are intalled.
+```sh
+update-alternatives --install /usr/bin/java java /opt/java/bin/java 100
+update-alternatives --config java
+```
+Create necessary environment variables
+```sh
+sudo vim /etc/profile.d/java.sh
+```
+```bash
+if ! echo ${PATH} | grep -q /opt/java/bin ; then
+	export PATH=/opt/java/bin:${PATH}
+fi      
+if ! echo ${PATH} | grep -q /opt/java/jre/bin ; then
+   export PATH=/opt/java/jre/bin:${PATH}
+fi      
+export JAVA_HOME=/opt/java
+export JRE_HOME=/opt/java/jre
+export CLASSPATH=.:/opt/java/lib/tools.jar:/opt/java/jre/lib/rt.jar
+```
+```sh
+sudo chmod 755 /etc/profile.d/java.sh
+```
+
+
+### Uninstall a package properly on Ubuntu
+```sh
+sudo apt-get purge git; 
+sudo apt-get autoremove;
+```
+now delete related files if exist in your home directory 
+```sh
+rm ~/.gitconfig
+```
+			
+### Installing postgresql debugger
+Edit postgresql.conf file present in  c:\program files\postgresql\9.3\data directory
+Un-comment or add this line:
+```vi
+shared_preload_libraries = '$libdir/plugin_debugger.dll'
+```
+Restart PostgreSQL server
+In the required database run following command 
+```sql
+create extension pldbgapi;
+```
+		
+
+### Maven download / install sources and javadocs
+Download sources
+```sh
+mvn dependency:sources
+```
+Download docs
+```sh
+mvn dependency:resolve -Dclassifier=javadoc
+```
+Download sources of specific package
+```sh
+mvn dependency:sources -DincludeArtifactIds=guava
+```
+Add plugin in pom.xml
+```pom
+<plugin>
+    <groupId>org.apache.maven.plugins</groupId>
+    <artifactId>maven-eclipse-plugin</artifactId>
+    <configuration>
+        <downloadSources>true</downloadSources>
+        <downloadJavadocs>true</downloadJavadocs>
+    </configuration>
+</plugin>
+```
+
+### Maven run a particular class
+Directly from command line
+:   ```
+    mvn exec:java -Dexec.mainClass="com.example.Main"
+    mvn exec:java -Dexec.mainClass="com.example.Main" -Dexec.args="arg0 arg1"
+    ```
+Using plugin
+:   ```pom
+	<plugin>
+	  <groupId>org.codehaus.mojo</groupId>
+	  <artifactId>exec-maven-plugin</artifactId>
+	  <version>1.2.1</version>
+	  <executions>
+		<execution>
+		  <goals>
+			<goal>java</goal>
+		  </goals>
+		</execution>
+	  </executions>
+	  <configuration>
+		<mainClass>com.example.Main</mainClass>
+		<arguments>
+		  <argument>foo</argument>
+		  <argument>bar</argument>
+		</arguments>
+	  </configuration>
+	</plugin>
+	```
+
+
+### Mongodb on Ubuntu-16.0
+*Reference taken from https://www.howtoforge.com/tutorial/install-mongodb-on-ubuntu-16.04*
+Importing key
+```sh
+sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv EA312927
+```
+Create source list file MongoDB
+```sh
+echo "deb http://repo.mongodb.org/apt/ubuntu "$(lsb_release -sc)"/mongodb-org/3.2 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.2.list
+sudo apt-get install mongodb-org
+```
+Create a new mongodb systemd service file in the '/lib/systemd/system' directory.
+```sh
+cd /lib/systemd/system/
+vim mongod.service
+```
+Now update the systemd service with command below:
+```sh
+systemctl daemon-reload
+```
+Start mongodb and add it as service to be started at boot time:
+```sh
+systemctl start mongod
+systemctl enable mongod
+```
+
+*Further to add mongodb in php*
+```sh
+composer require mongodb/mongodb
+```
+
+
+### Generic runnable/executable file/application as service in ubuntu
+Edit /etc/systemd/system/prometheus.service
+```vi	
+[Unit]
+Description=Prometheus Service
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/prometheus/prometheus --config.file=/usr/local/bin/prometheus/prometheus.yml
+
+[Install]
+WantedBy=multi-user.target 
+```
+```sh
+sudo service prometheus start
+```
+<br>
+<br>
+
+---
+# Setup
+		
+### Disabling lightdm (or other service) 
+1. Method 1
+	```sh
+    echo manual | sudo tee etc/init.d/lightdm.override
+    ```
+	i.e. create <service>.override file to disable it (override it)
+	*This method is not working after 14.0*
+
+2. Method 2 
+	edit /etc/default/grub
+	replace 	GRUB_CMDLINE_LINUX_DEFAULT="quiet splash"
+	with		GRUB_CMDLINE_LINUX_DEFAULT="text"
+	```sh
+    sudo update-grub
+    ```
+
+### Disable ssh login without password
+1.  Edit /etc/ssh/sshd_config and change following settings
+    ```vi
+	ChallengeResponseAuthentication no
+	PasswordAuthentication no
+	UsePAM no
+	```
+	```sh
+	sudo /etc/init.d/ssh reload
+	```
+	
+### Setting git to login wihout password + using ssh in git
+Create ssh-key
+```sh
+ssh-keygen
+```
+Copy your .pub file in remote git application from where you want to connect
+Add your private key using ssh-agent into your system (if you don't want to provide key every time)
+```sh
+ssh-add ~/.ssh/id_rsa
+```
+<br>
+<br>
+
+### Adding git with ssh protocol on windows
+Open git-bash 
+```sh
+ssh-keygen
+vim ~/.bashrc
+```
+Enter following lines in editor
+```vi
+eval `ssh-agent`
+ssh-add
+```
+Restart git-bash
+```sh
+rm ~/.bashrc
+```
+Close git-bash
+RSA public key of ssh is present in .ssh directory inside %userprofile% 
+
+
+### Convert openssh private key to pem format
+```sh
+ssh-keygen -p -N "" -m pem -f /path/to/key
+```
+
+### Analyze which service taken how much time during startup or bootup
+```sh
+systemd-analyze blame
+```
+
+### Linux Sending mail from command line
+MSMTP (SMTP client)
+:   >(Documentation could be found at http://msmtp.sourceforge.net/doc/msmtp.html)
+    
+    ```sh
+	sudo apt-get install msmtp
+    vim ~/.msmtprc
+	```
+	Now in opened editor set default values for all following accounts.
+	```vi
+	# Set default values for all following accounts.
+	defaults
+	auth           on
+	tls            on
+	tls_trust_file /etc/ssl/certs/ca-certificates.crt
+	logfile        ~/.msmtp.log
+
+	# Gmail
+	account        gmail
+	host           smtp.gmail.com
+	port           587
+	from           username@gmail.com
+	user           username
+	password       plain-text-password
+
+	# A freemail service
+	account        freemail
+	host           smtp.freemail.example
+	from           joe_smith@freemail.example
+	...
+
+	# Set a default account
+	account default : gmail
+	```
+
+### Linux fetching mail from command line
+fetchmail (remote-mail retrieval and forwarding utility intended to be used over on-demand TCP/IP)
+`... PENDING ...`
+			
+	
+### Adding ssh client in linux
+```sh
+sudo apt-get install openssh-server
+```
+Create a file **~/.ssh/authorized_keys** if not exist
+```sh
+touch ~/.ssh/authorized_keys
+```
+Append your public key in this file
+```sh
+cat rsa_public_key.pub >> ~/.ssh/authorized_keys
+```
+Now you can access this linux from windows by following command
+```sh
+ssh -i rsa_private_key username@ipaddress
+```
+You can use ssh-keygen to create public private rsa key pair
+
+
+
+### Forcefully disconnect an ssh client
+find process id of ssh for client
+```sh
+sudo netstat -tnpa | grep ssh
+```
+kill process
+```sh
+kill -9 <pid>
+```
+
+
+
+### Logging ssh session   `Important`
+Download log-session script
+```sh
+wget http://www.jms1.net/log-session
+```
+Find out where the sftp-server binary is located
+```sh
+grep sftp /etc/ssh/sshd_config
+```
+Edit log-session file and replace following content
+```sh
+SFTP_SERVER=<location_of_sftp_server>
+SFTP_SERVER=/usr/lib/openssh/sftp-server
+```
+Make log-session file executable
+```sh
+chmod 755 log-session
+```
+Edit ~/.ssh/authorized_keys and append following
+```vi
+command="<location_of_log_session>"
+command="/usr/local/sbin/log-session" ssh-dss AAAAB3Nz...
+```
+
+
+### Securing your password with public key encryption
+Securing your password (or anything for the secure transmission of information between parties) with public key encryption
+Install gnupg
+```sh
+sudo apt-get install gnupg
+```
+Create key pair (give desired inputs and wait until key is created)
+```sh
+gpg --gen-key
+```
+To encrypt 
+```
+<CMD TO O/P> | gpg -e -r <RECIPIENT>
+```
+To decrypt
+```
+<CMD TO O/P> | gpg -d
+```
+To get list of keys
+```
+gpg -k
+```
+To get public key
+`... PENDING ...`
+	
+	
+### Downloading entire site with wget
+```sh
+wget \
+ --recursive \
+ --no-clobber \
+ --page-requisites \
+ --html-extension \
+ --convert-links \
+ --restrict-file-names=windows \
+ --domains website.org \
+ --no-parent \
+     www.website.org/tutorials/html/
+```
+
+### Persist iptables configuration
+install iptables-persistent
+```sh
+sudo apt-get install iptables-persistent
+```
+save iptables configuration with iptables-persistent
+```sh
+sudo iptables-persistent save
+```
+
+### Setting iptables to redirect port (could be used to set wildfly to get request from 80 port)
+```sh
+sudo iptables -A PREROUTING -t nat -p tcp --dport 80 -j REDIRECT --to-port 8080
+```
+
+### Setting iptables to redirect port on local machine
+```sh
+sudo iptables -t nat -I OUTPUT -p tcp -o lo --dport 80 -j REDIRECT --to-ports 8080
+```
+
+	
+### Get linux distribution information
+```sh
+lsb_release -a
+cat /etc/*-release
+uname -a
+cat /proc/version
+```
+
+
+### Compress, zip, extract files directory etc
+```sh
+tar -cvzf <filename_with_.tar.gz_extension> <directory_or_file>
+tar -xvzf <filename_with_.tar.gz_extension> 
+tar -cvzf - <file1> <file2> ... <filen>
+```
+
+### Continue last transaction of package manager like apt-get or yum
+```sh
+yum-complete-transaction [--cleanup-only] 
+yum history redo last
+```
+
+
+### View image from command line
+Using caca to view image with characters
+:   ```sh
+    sudo apt-get install caca-utils
+    cacaview <any_image_.jpg>
+    ```
+
+Using fbi which will use framebuffer
+: ```sh
+    sudo apt-get install fbi
+    fbi <any_image_.jpg>
+    ```
+
+### Creating desktop launcher for an application
+vim /home/$HOME/.local/share/applications/`<application_name>`.desktop
+```vi
+[Desktop Entry]
+Version=1.0
+Name=<Application Name>
+Comment=<e.g. Java IDE>
+Type=Application
+Categories=<e.g. Development;IDE;>
+Exec=<application location e.g. /home/${USERNAME}/applications/eclipse/eclipse>
+Terminal=false
+StartupNotify=true
+Icon=<icon location e.g. /home/${USERNAME}/applications/eclipse/icon.xpm>
+Name[en_US]=<Application Name e.g. Eclipse>
+```
+<br>
+<br>
+
+--- 
+# Installations
+
+### Installation scripts to setup environment 
+alpine setup environment
+```sh
+<<<<<<<<<<<<<<<<<<<<<<<<
+```
+
+### Adding new php version in wamp server
+	
+1.	create new folder [path-to-wamp]/bin/php/php.#.#.# and copy files here
+2. 	copy following files from older php
+	1. php.ini
+	2. phpForApache.ini
+	3. wampserver.conf
+3.	Take snapshots of wamp>PHP>PHP Settings and wamp>PHP>PHP Extendsion
+4.	Open wamp>PHP>php.ini and save it as a backup
+5.	Restart wamp , Change wamp>PHP>Version>latest_version
+6.	Use a diff tool to get differences between old php.ini and new one to satisfy all extensions
+
+		
+### Installing LAMPP
+	
+1.	Install apache web server
+    ```sh
+    sudo apt-get install apache2
+    ```
+	/etc/apache2/apache2.conf contains configurations
+	/etc/apache2/ports.conf contains ports configuration
+2. Install PHP
+    ```sh
+    sudo apt-get install php5 libapache2-mod-php5
+    ```
+    directory for lookup is /var/www/html
+3.	Install mysql
+    ```sh
+    sudo apt-get install mysql-server
+    ```
+	add following lines in /etc/apache2/apache2.conf
+	```vi
+	#phpMyAdmin Configuration
+	Include /etc/phpmyadmin/apache.conf
+	```
+4.	In Ubuntu also need to run following commands to make mcrypt recognized in phpmyadmin/install mcrypt right way
+	```sh
+	php5enmod mcrypt
+	```
+
+### Installing LEMP
+1.  Install nginx 
+    ```sh
+    sudo apt-get install nginx
+    ```
+	Edit /etc/nginx/sites-available/default
+	(If /usr/share/nginx/www does not exist, it's probably called html. Make sure you update your configuration appropriately)
+	1. Add index.php to the index line.
+	2. Change the server_name from local host to your domain name or IP address (replace the example.com in the configuration)
+	3. Change the correct lines in "location ~ \.php$ {" section
+	    ```vi
+		server {
+			listen   80;
+	
+			root /usr/share/nginx/www;
+			index index.php index.html index.htm;
+
+			server_name example.com;
+
+			location / {
+					try_files $uri $uri/ /index.html;
+			}
+
+			error_page 404 /404.html;
+
+			error_page 500 502 503 504 /50x.html;
+			location = /50x.html {
+				  root /usr/share/nginx/www;
+			}
+			
+			# pass the PHP scripts to FastCGI server listening on the php-fpm socket
+			location ~ \.php$ {
+					try_files $uri =404;
+					fastcgi_pass unix:/var/run/php5-fpm.sock;
+					fastcgi_index index.php;
+					fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+					include fastcgi_params;
+					
+			}
+		}
+		```
+		
+2.  Install mysql with php-mysql
+	```sh
+    sudo apt-get install mysql-server php5-mysql
+    ```
+	Activate mysql
+	```sh
+	sudo mysql_install_db
+    ```
+	setup script
+	```sh
+	sudo /usr/bin/mysql_secure_installation
+    ```
+	
+3. 	Install PHP
+    ```sh
+	sudo apt-get install php5-fpm
+	```
+	
+	Configure php
+	Edit php.ini file vim /etc/php5/fpm/php.ini
+    ```vi
+    cgi.fix_pathinfo=0
+    ```
+    
+	Edit /etc/php5/fpm/pool.d/www.conf
+	Find the line, `listen = 127.0.0.1:9000`, and change the `127.0.0.1:9000` to `/var/run/php5-fpm.sock`. 
+	```vi
+	listen = /var/run/php5-fpm.sock
+	```
+	Restart php-fpm
+	```sh
+    sudo service php5-fpm restart
+    ```
+    
+4. Create info.php
+    ```sh
+	sudo nano /usr/share/nginx/html/info.php
+	```
+	```vi
+	<?php
+	phpinfo();
+	?>
+	```
+	restart nginx
+	```sh
+	sudo service nginx restart
+	```
+
+	
+### Installing Composer in Linux
+1. Download the installer to the current directory
+2. Verify the installer SHA-384 either by below command or cross checking at https://composer.github.io/pubkeys.html
+	php -r "if (hash('SHA384', file_get_contents('composer-setup.php')) === 'fd26ce67e3b237fffd5e5544b45b0d92c41a4afe3e3f778e942e43ce6be197b9cdc7c251dcde6e2a52297ea269370680') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); }"
+3.	Run the installer
+		php composer-setup.php
+4.	Remove the installer
+		php -r "unlink('composer-setup.php');"
+5.	To install composer Globally move the downloaded file to /usr/local/bin/composer
+		mv composer.phar /usr/local/bin/composer
+
+### Installing Laravel 
+On Windows 
+:   ```sh
+    composer global require "laravel/installer"
+    ```
+On Linux using local composer.phar
+:    ```sh
+	php composer.phar global require "laravel/installer"
+	```
+
+**Plugin to add laravel framework in netbeans**
+*https://github.com/nbphpcouncil/nb-laravel-plugin/releases*
+
+			
+	
+### Installing java manually
+Download .tar.gz file (preferred to be downloaded from oracle's site)
+```sh
+wget  --no-cookies --no-check-certificate --header "Cookie: gpw_e24=http%3A%2F%2Fwww.oracle.com%2F; oraclelicense=accept-securebackup-cookie" <url>
+```
+
+Extract .tar.gz file in /opt directory
+```sh
+tar -zxvf jdk-*u**-linux-****.tar.gz
+```
+Create symbolic link in order to simplify java updates in future
+```sh
+ln -s /opt/jdk1.8.0_144 /opt/java
+```
+Tell system where java and ts executables are intalled.
+```sh
+update-alternatives --install /usr/bin/java java /opt/java/bin/java 100
+update-alternatives --config java
+```
+Create necessary environment variables
+```sh
+sudo vim /etc/profile.d/java.sh
+```
+```bash
+if ! echo ${PATH} | grep -q /opt/java/bin ; then
+	export PATH=/opt/java/bin:${PATH}
+fi      
+if ! echo ${PATH} | grep -q /opt/java/jre/bin ; then
+   export PATH=/opt/java/jre/bin:${PATH}
+fi      
+export JAVA_HOME=/opt/java
+export JRE_HOME=/opt/java/jre
+export CLASSPATH=.:/opt/java/lib/tools.jar:/opt/java/jre/lib/rt.jar
+```
+```sh
+sudo chmod 755 /etc/profile.d/java.sh
+```
+
+
+### Uninstall a package properly on Ubuntu
+```sh
+sudo apt-get purge git; 
+sudo apt-get autoremove;
+```
+now delete related files if exist in your home directory 
+```sh
+rm ~/.gitconfig
+```
+			
+### Installing postgresql debugger
+Edit postgresql.conf file present in  c:\program files\postgresql\9.3\data directory
+Un-comment or add this line:
+```vi
+shared_preload_libraries = '$libdir/plugin_debugger.dll'
+```
+Restart PostgreSQL server
+In the required database run following command 
+```sql
+create extension pldbgapi;
+```
+		
+
+### Maven download / install sources and javadocs
+Download sources
+```sh
+mvn dependency:sources
+```
+Download docs
+```sh
+mvn dependency:resolve -Dclassifier=javadoc
+```
+Download sources of specific package
+```sh
+mvn dependency:sources -DincludeArtifactIds=guava
+```
+Add plugin in pom.xml
+```pom
+<plugin>
+    <groupId>org.apache.maven.plugins</groupId>
+    <artifactId>maven-eclipse-plugin</artifactId>
+    <configuration>
+        <downloadSources>true</downloadSources>
+        <downloadJavadocs>true</downloadJavadocs>
+    </configuration>
+</plugin>
+```
+
+### Maven run a particular class
+Directly from command line
+:   ```
+    mvn exec:java -Dexec.mainClass="com.example.Main"
+    mvn exec:java -Dexec.mainClass="com.example.Main" -Dexec.args="arg0 arg1"
+    ```
+Using plugin
+:   ```pom
+	<plugin>
+	  <groupId>org.codehaus.mojo</groupId>
+	  <artifactId>exec-maven-plugin</artifactId>
+	  <version>1.2.1</version>
+	  <executions>
+		<execution>
+		  <goals>
+			<goal>java</goal>
+		  </goals>
+		</execution>
+	  </executions>
+	  <configuration>
+		<mainClass>com.example.Main</mainClass>
+		<arguments>
+		  <argument>foo</argument>
+		  <argument>bar</argument>
+		</arguments>
+	  </configuration>
+	</plugin>
+	```
+
+
+### Mongodb on Ubuntu-16.0
+*Reference taken from https://www.howtoforge.com/tutorial/install-mongodb-on-ubuntu-16.04*
+Importing key
+```sh
+sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv EA312927
+```
+Create source list file MongoDB
+```sh
+echo "deb http://repo.mongodb.org/apt/ubuntu "$(lsb_release -sc)"/mongodb-org/3.2 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.2.list
+sudo apt-get install mongodb-org
+```
+Create a new mongodb systemd service file in the '/lib/systemd/system' directory.
+```sh
+cd /lib/systemd/system/
+vim mongod.service
+```
+Now update the systemd service with command below:
+```sh
+systemctl daemon-reload
+```
+Start mongodb and add it as service to be started at boot time:
+```sh
+systemctl start mongod
+systemctl enable mongod
+```
+
+*Further to add mongodb in php*
+```sh
+composer require mongodb/mongodb
+```
+
+
+### Generic runnable/executable file/application as service in ubuntu
+Edit /etc/systemd/system/prometheus.service
+```vi	
+[Unit]
+Description=Prometheus Service
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/prometheus/prometheus --config.file=/usr/local/bin/prometheus/prometheus.yml
+
+[Install]
+WantedBy=multi-user.target 
+```
+```sh
+sudo service prometheus start
+```
+<br>
+<br>
+
+---
+# Setup
+		
+### Disabling lightdm (or other service) 
+1. Method 1
+	```sh
+    echo manual | sudo tee etc/init.d/lightdm.override
+    ```
+	i.e. create <service>.override file to disable it (override it)
+	*This method is not working after 14.0*
+
+2. Method 2 
+	edit /etc/default/grub
+	replace 	GRUB_CMDLINE_LINUX_DEFAULT="quiet splash"
+	with		GRUB_CMDLINE_LINUX_DEFAULT="text"
+	```sh
+    sudo update-grub
+    ```
+
+### Disable ssh login without password
+1.  Edit /etc/ssh/sshd_config and change following settings
+    ```vi
+	ChallengeResponseAuthentication no
+	PasswordAuthentication no
+	UsePAM no
+	```
+	```sh
+	sudo /etc/init.d/ssh reload
+	```
+	
+### Setting git to login wihout password + using ssh in git
+Create ssh-key
+```sh
+ssh-keygen
+```
+Copy your .pub file in remote git application from where you want to connect
+Add your private key using ssh-agent into your system (if you don't want to provide key every time)
+```sh
+ssh-add ~/.ssh/id_rsa
+```
+<br>
+<br>
+
+### Adding git with ssh protocol on windows
+Open git-bash 
+```sh
+ssh-keygen
+vim ~/.bashrc
+```
+Enter following lines in editor
+```vi
+eval `ssh-agent`
+ssh-add
+```
+Restart git-bash
+```sh
+rm ~/.bashrc
+```
+Close git-bash
+RSA public key of ssh is present in .ssh directory inside %userprofile% 
+
+
+### Convert openssh private key to pem format
+```sh
+ssh-keygen -p -N "" -m pem -f /path/to/key
+```
+
+### Analyze which service taken how much time during startup or bootup
+```sh
+systemd-analyze blame
+```
+
+### Linux Sending mail from command line
+MSMTP (SMTP client)
+:   >(Documentation could be found at http://msmtp.sourceforge.net/doc/msmtp.html)
+    
+    ```sh
+	sudo apt-get install msmtp
+    vim ~/.msmtprc
+	```
+	Now in opened editor set default values for all following accounts.
+	```vi
+	# Set default values for all following accounts.
+	defaults
+	auth           on
+	tls            on
+	tls_trust_file /etc/ssl/certs/ca-certificates.crt
+	logfile        ~/.msmtp.log
+
+	# Gmail
+	account        gmail
+	host           smtp.gmail.com
+	port           587
+	from           username@gmail.com
+	user           username
+	password       plain-text-password
+
+	# A freemail service
+	account        freemail
+	host           smtp.freemail.example
+	from           joe_smith@freemail.example
+	...
+
+	# Set a default account
+	account default : gmail
+	```
+
+### Linux fetching mail from command line
+fetchmail (remote-mail retrieval and forwarding utility intended to be used over on-demand TCP/IP)
+`... PENDING ...`
+			
+	
+### Adding ssh client in linux
+```sh
+sudo apt-get install openssh-server
+```
+Create a file **~/.ssh/authorized_keys** if not exist
+```sh
+touch ~/.ssh/authorized_keys
+```
+Append your public key in this file
+```sh
+cat rsa_public_key.pub >> ~/.ssh/authorized_keys
+```
+Now you can access this linux from windows by following command
+```sh
+ssh -i rsa_private_key username@ipaddress
+```
+You can use ssh-keygen to create public private rsa key pair
+
+
+
+### Forcefully disconnect an ssh client
+find process id of ssh for client
+```sh
+sudo netstat -tnpa | grep ssh
+```
+kill process
+```sh
+kill -9 <pid>
+```
+
+
+
+### Logging ssh session   `Important`
+Download log-session script
+```sh
+wget http://www.jms1.net/log-session
+```
+Find out where the sftp-server binary is located
+```sh
+grep sftp /etc/ssh/sshd_config
+```
+Edit log-session file and replace following content
+```sh
+SFTP_SERVER=<location_of_sftp_server>
+SFTP_SERVER=/usr/lib/openssh/sftp-server
+```
+Make log-session file executable
+```sh
+chmod 755 log-session
+```
+Edit ~/.ssh/authorized_keys and append following
+```vi
+command="<location_of_log_session>"
+command="/usr/local/sbin/log-session" ssh-dss AAAAB3Nz...
+```
+
+
+### Securing your password with public key encryption
+Securing your password (or anything for the secure transmission of information between parties) with public key encryption
+Install gnupg
+```sh
+sudo apt-get install gnupg
+```
+Create key pair (give desired inputs and wait until key is created)
+```sh
+gpg --gen-key
+```
+To encrypt 
+```
+<CMD TO O/P> | gpg -e -r <RECIPIENT>
+```
+To decrypt
+```
+<CMD TO O/P> | gpg -d
+```
+To get list of keys
+```
+gpg -k
+```
+To get public key
+`... PENDING ...`
+	
+	
+### Downloading entire site with wget
+```sh
+wget \
+ --recursive \
+ --no-clobber \
+ --page-requisites \
+ --html-extension \
+ --convert-links \
+ --restrict-file-names=windows \
+ --domains website.org \
+ --no-parent \
+     www.website.org/tutorials/html/
+```
+
+### Persist iptables configuration
+install iptables-persistent
+```sh
+sudo apt-get install iptables-persistent
+```
+save iptables configuration with iptables-persistent
+```sh
+sudo iptables-persistent save
+```
+
+### Setting iptables to redirect port (could be used to set wildfly to get request from 80 port)
+```sh
+sudo iptables -A PREROUTING -t nat -p tcp --dport 80 -j REDIRECT --to-port 8080
+```
+
+### Setting iptables to redirect port on local machine
+```sh
+sudo iptables -t nat -I OUTPUT -p tcp -o lo --dport 80 -j REDIRECT --to-ports 8080
+```
+
+	
+### Get linux distribution information
+```sh
+lsb_release -a
+cat /etc/*-release
+uname -a
+cat /proc/version
+```
+
+
+### Compress, zip, extract files directory etc
+```sh
+tar -cvzf <filename_with_.tar.gz_extension> <directory_or_file>
+tar -xvzf <filename_with_.tar.gz_extension> 
+tar -cvzf - <file1> <file2> ... <filen>
+```
+
+### Continue last transaction of package manager like apt-get or yum
+```sh
+yum-complete-transaction [--cleanup-only] 
+yum history redo last
+```
+
+
+### View image from command line
+Using caca to view image with characters
+:   ```sh
+    sudo apt-get install caca-utils
+    cacaview <any_image_.jpg>
+    ```
+
+Using fbi which will use framebuffer
+: ```sh
+    sudo apt-get install fbi
+    fbi <any_image_.jpg>
+    ```
+
+### Creating desktop launcher for an application
+vim /home/$HOME/.local/share/applications/`<application_name>`.desktop
+```vi
+[Desktop Entry]
+Version=1.0
+Name=<Application Name>
+Comment=<e.g. Java IDE>
+Type=Application
+Categories=<e.g. Development;IDE;>
+Exec=<application location e.g. /home/${USERNAME}/applications/eclipse/eclipse>
+Terminal=false
+StartupNotify=true
+Icon=<icon location e.g. /home/${USERNAME}/applications/eclipse/icon.xpm>
+Name[en_US]=<Application Name e.g. Eclipse>
+```
+<br>
+<br>
+
+--- 
+# Installations
+
+### Installation scripts to setup environment 
+alpine setup environment
+```sh
+<<<<<<<<<<<<<<<<<<<<<<<<
+```
+
+### Adding new php version in wamp server
+	
+1.	create new folder [path-to-wamp]/bin/php/php.#.#.# and copy files here
+2. 	copy following files from older php
+	1. php.ini
+	2. phpForApache.ini
+	3. wampserver.conf
+3.	Take snapshots of wamp>PHP>PHP Settings and wamp>PHP>PHP Extendsion
+4.	Open wamp>PHP>php.ini and save it as a backup
+5.	Restart wamp , Change wamp>PHP>Version>latest_version
+6.	Use a diff tool to get differences between old php.ini and new one to satisfy all extensions
+
+		
+### Installing LAMPP
+	
+1.	Install apache web server
+    ```sh
+    sudo apt-get install apache2
+    ```
+	/etc/apache2/apache2.conf contains configurations
+	/etc/apache2/ports.conf contains ports configuration
+2. Install PHP
+    ```sh
+    sudo apt-get install php5 libapache2-mod-php5
+    ```
+    directory for lookup is /var/www/html
+3.	Install mysql
+    ```sh
+    sudo apt-get install mysql-server
+    ```
+	add following lines in /etc/apache2/apache2.conf
+	```vi
+	#phpMyAdmin Configuration
+	Include /etc/phpmyadmin/apache.conf
+	```
+4.	In Ubuntu also need to run following commands to make mcrypt recognized in phpmyadmin/install mcrypt right way
+	```sh
+	php5enmod mcrypt
+	```
+
+### Installing LEMP
+1.  Install nginx 
+    ```sh
+    sudo apt-get install nginx
+    ```
+	Edit /etc/nginx/sites-available/default
+	(If /usr/share/nginx/www does not exist, it's probably called html. Make sure you update your configuration appropriately)
+	1. Add index.php to the index line.
+	2. Change the server_name from local host to your domain name or IP address (replace the example.com in the configuration)
+	3. Change the correct lines in "location ~ \.php$ {" section
+	    ```vi
+		server {
+			listen   80;
+	
+			root /usr/share/nginx/www;
+			index index.php index.html index.htm;
+
+			server_name example.com;
+
+			location / {
+					try_files $uri $uri/ /index.html;
+			}
+
+			error_page 404 /404.html;
+
+			error_page 500 502 503 504 /50x.html;
+			location = /50x.html {
+				  root /usr/share/nginx/www;
+			}
+			
+			# pass the PHP scripts to FastCGI server listening on the php-fpm socket
+			location ~ \.php$ {
+					try_files $uri =404;
+					fastcgi_pass unix:/var/run/php5-fpm.sock;
+					fastcgi_index index.php;
+					fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+					include fastcgi_params;
+					
+			}
+		}
+		```
+		
+2.  Install mysql with php-mysql
+	```sh
+    sudo apt-get install mysql-server php5-mysql
+    ```
+	Activate mysql
+	```sh
+	sudo mysql_install_db
+    ```
+	setup script
+	```sh
+	sudo /usr/bin/mysql_secure_installation
+    ```
+	
+3. 	Install PHP
+    ```sh
+	sudo apt-get install php5-fpm
+	```
+	
+	Configure php
+	Edit php.ini file vim /etc/php5/fpm/php.ini
+    ```vi
+    cgi.fix_pathinfo=0
+    ```
+    
+	Edit /etc/php5/fpm/pool.d/www.conf
+	Find the line, `listen = 127.0.0.1:9000`, and change the `127.0.0.1:9000` to `/var/run/php5-fpm.sock`. 
+	```vi
+	listen = /var/run/php5-fpm.sock
+	```
+	Restart php-fpm
+	```sh
+    sudo service php5-fpm restart
+    ```
+    
+4. Create info.php
+    ```sh
+	sudo nano /usr/share/nginx/html/info.php
+	```
+	```vi
+	<?php
+	phpinfo();
+	?>
+	```
+	restart nginx
+	```sh
+	sudo service nginx restart
+	```
+
+	
+### Installing Composer in Linux
+1. Download the installer to the current directory
+2. Verify the installer SHA-384 either by below command or cross checking at https://composer.github.io/pubkeys.html
+	php -r "if (hash('SHA384', file_get_contents('composer-setup.php')) === 'fd26ce67e3b237fffd5e5544b45b0d92c41a4afe3e3f778e942e43ce6be197b9cdc7c251dcde6e2a52297ea269370680') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); }"
+3.	Run the installer
+		php composer-setup.php
+4.	Remove the installer
+		php -r "unlink('composer-setup.php');"
+5.	To install composer Globally move the downloaded file to /usr/local/bin/composer
+		mv composer.phar /usr/local/bin/composer
+
+### Installing Laravel 
+On Windows 
+:   ```sh
+    composer global require "laravel/installer"
+    ```
+On Linux using local composer.phar
+:    ```sh
+	php composer.phar global require "laravel/installer"
+	```
+
+**Plugin to add laravel framework in netbeans**
+*https://github.com/nbphpcouncil/nb-laravel-plugin/releases*
+
+			
+	
+### Installing java manually
+Download .tar.gz file (preferred to be downloaded from oracle's site)
+```sh
+wget  --no-cookies --no-check-certificate --header "Cookie: gpw_e24=http%3A%2F%2Fwww.oracle.com%2F; oraclelicense=accept-securebackup-cookie" <url>
+```
+
+Extract .tar.gz file in /opt directory
+```sh
+tar -zxvf jdk-*u**-linux-****.tar.gz
+```
+Create symbolic link in order to simplify java updates in future
+```sh
+ln -s /opt/jdk1.8.0_144 /opt/java
+```
+Tell system where java and ts executables are intalled.
+```sh
+update-alternatives --install /usr/bin/java java /opt/java/bin/java 100
+update-alternatives --config java
+```
+Create necessary environment variables
+```sh
+sudo vim /etc/profile.d/java.sh
+```
+```bash
+if ! echo ${PATH} | grep -q /opt/java/bin ; then
+	export PATH=/opt/java/bin:${PATH}
+fi      
+if ! echo ${PATH} | grep -q /opt/java/jre/bin ; then
+   export PATH=/opt/java/jre/bin:${PATH}
+fi      
+export JAVA_HOME=/opt/java
+export JRE_HOME=/opt/java/jre
+export CLASSPATH=.:/opt/java/lib/tools.jar:/opt/java/jre/lib/rt.jar
+```
+```sh
+sudo chmod 755 /etc/profile.d/java.sh
+```
+
+
+### Uninstall a package properly on Ubuntu
+```sh
+sudo apt-get purge git; 
+sudo apt-get autoremove;
+```
+now delete related files if exist in your home directory 
+```sh
+rm ~/.gitconfig
+```
+			
+### Installing postgresql debugger
+Edit postgresql.conf file present in  c:\program files\postgresql\9.3\data directory
+Un-comment or add this line:
+```vi
+shared_preload_libraries = '$libdir/plugin_debugger.dll'
+```
+Restart PostgreSQL server
+In the required database run following command 
+```sql
+create extension pldbgapi;
+```
+		
+
+### Maven download / install sources and javadocs
+Download sources
+```sh
+mvn dependency:sources
+```
+Download docs
+```sh
+mvn dependency:resolve -Dclassifier=javadoc
+```
+Download sources of specific package
+```sh
+mvn dependency:sources -DincludeArtifactIds=guava
+```
+Add plugin in pom.xml
+```pom
+<plugin>
+    <groupId>org.apache.maven.plugins</groupId>
+    <artifactId>maven-eclipse-plugin</artifactId>
+    <configuration>
+        <downloadSources>true</downloadSources>
+        <downloadJavadocs>true</downloadJavadocs>
+    </configuration>
+</plugin>
+```
+
+### Maven run a particular class
+Directly from command line
+:   ```
+    mvn exec:java -Dexec.mainClass="com.example.Main"
+    mvn exec:java -Dexec.mainClass="com.example.Main" -Dexec.args="arg0 arg1"
+    ```
+Using plugin
+:   ```pom
+	<plugin>
+	  <groupId>org.codehaus.mojo</groupId>
+	  <artifactId>exec-maven-plugin</artifactId>
+	  <version>1.2.1</version>
+	  <executions>
+		<execution>
+		  <goals>
+			<goal>java</goal>
+		  </goals>
+		</execution>
+	  </executions>
+	  <configuration>
+		<mainClass>com.example.Main</mainClass>
+		<arguments>
+		  <argument>foo</argument>
+		  <argument>bar</argument>
+		</arguments>
+	  </configuration>
+	</plugin>
+	```
+
+
+### Mongodb on Ubuntu-16.0
+*Reference taken from https://www.howtoforge.com/tutorial/install-mongodb-on-ubuntu-16.04*
+Importing key
+```sh
+sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv EA312927
+```
+Create source list file MongoDB
+```sh
+echo "deb http://repo.mongodb.org/apt/ubuntu "$(lsb_release -sc)"/mongodb-org/3.2 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.2.list
+sudo apt-get install mongodb-org
+```
+Create a new mongodb systemd service file in the '/lib/systemd/system' directory.
+```sh
+cd /lib/systemd/system/
+vim mongod.service
+```
+Now update the systemd service with command below:
+```sh
+systemctl daemon-reload
+```
+Start mongodb and add it as service to be started at boot time:
+```sh
+systemctl start mongod
+systemctl enable mongod
+```
+
+*Further to add mongodb in php*
+```sh
+composer require mongodb/mongodb
+```
+
+
+### Generic runnable/executable file/application as service in ubuntu
+Edit /etc/systemd/system/prometheus.service
+```vi	
+[Unit]
+Description=Prometheus Service
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/prometheus/prometheus --config.file=/usr/local/bin/prometheus/prometheus.yml
+
+[Install]
+WantedBy=multi-user.target 
+```
+```sh
+sudo service prometheus start
+```
+<br>
+<br>
+
+---
+# Setup
+		
+### Disabling lightdm (or other service) 
+1. Method 1
+	```sh
+    echo manual | sudo tee etc/init.d/lightdm.override
+    ```
+	i.e. create <service>.override file to disable it (override it)
+	*This method is not working after 14.0*
+
+2. Method 2 
+	edit /etc/default/grub
+	replace 	GRUB_CMDLINE_LINUX_DEFAULT="quiet splash"
+	with		GRUB_CMDLINE_LINUX_DEFAULT="text"
+	```sh
+    sudo update-grub
+    ```
+
+### Disable ssh login without password
+1.  Edit /etc/ssh/sshd_config and change following settings
+    ```vi
+	ChallengeResponseAuthentication no
+	PasswordAuthentication no
+	UsePAM no
+	```
+	```sh
+	sudo /etc/init.d/ssh reload
+	```
+	
+### Setting git to login wihout password + using ssh in git
+Create ssh-key
+```sh
+ssh-keygen
+```
+Copy your .pub file in remote git application from where you want to connect
+Add your private key using ssh-agent into your system (if you don't want to provide key every time)
+```sh
+ssh-add ~/.ssh/id_rsa
+```
+<br>
+<br>
+
+### Adding git with ssh protocol on windows
+Open git-bash 
+```sh
+ssh-keygen
+vim ~/.bashrc
+```
+Enter following lines in editor
+```vi
+eval `ssh-agent`
+ssh-add
+```
+Restart git-bash
+```sh
+rm ~/.bashrc
+```
+Close git-bash
+RSA public key of ssh is present in .ssh directory inside %userprofile% 
+
+
+### Convert openssh private key to pem format
+```sh
+ssh-keygen -p -N "" -m pem -f /path/to/key
+```
+
+### Analyze which service taken how much time during startup or bootup
+```sh
+systemd-analyze blame
+```
+
+### Linux Sending mail from command line
+MSMTP (SMTP client)
+:   >(Documentation could be found at http://msmtp.sourceforge.net/doc/msmtp.html)
+    
+    ```sh
+	sudo apt-get install msmtp
+    vim ~/.msmtprc
+	```
+	Now in opened editor set default values for all following accounts.
+	```vi
+	# Set default values for all following accounts.
+	defaults
+	auth           on
+	tls            on
+	tls_trust_file /etc/ssl/certs/ca-certificates.crt
+	logfile        ~/.msmtp.log
+
+	# Gmail
+	account        gmail
+	host           smtp.gmail.com
+	port           587
+	from           username@gmail.com
+	user           username
+	password       plain-text-password
+
+	# A freemail service
+	account        freemail
+	host           smtp.freemail.example
+	from           joe_smith@freemail.example
+	...
+
+	# Set a default account
+	account default : gmail
+	```
+
+### Linux fetching mail from command line
+fetchmail (remote-mail retrieval and forwarding utility intended to be used over on-demand TCP/IP)
+`... PENDING ...`
+			
+	
+### Adding ssh client in linux
+```sh
+sudo apt-get install openssh-server
+```
+Create a file **~/.ssh/authorized_keys** if not exist
+```sh
+touch ~/.ssh/authorized_keys
+```
+Append your public key in this file
+```sh
+cat rsa_public_key.pub >> ~/.ssh/authorized_keys
+```
+Now you can access this linux from windows by following command
+```sh
+ssh -i rsa_private_key username@ipaddress
+```
+You can use ssh-keygen to create public private rsa key pair
+
+
+
+### Forcefully disconnect an ssh client
+find process id of ssh for client
+```sh
+sudo netstat -tnpa | grep ssh
+```
+kill process
+```sh
+kill -9 <pid>
+```
+
+
+
+### Logging ssh session   `Important`
+Download log-session script
+```sh
+wget http://www.jms1.net/log-session
+```
+Find out where the sftp-server binary is located
+```sh
+grep sftp /etc/ssh/sshd_config
+```
+Edit log-session file and replace following content
+```sh
+SFTP_SERVER=<location_of_sftp_server>
+SFTP_SERVER=/usr/lib/openssh/sftp-server
+```
+Make log-session file executable
+```sh
+chmod 755 log-session
+```
+Edit ~/.ssh/authorized_keys and append following
+```vi
+command="<location_of_log_session>"
+command="/usr/local/sbin/log-session" ssh-dss AAAAB3Nz...
+```
+
+
+### Securing your password with public key encryption
+Securing your password (or anything for the secure transmission of information between parties) with public key encryption
+Install gnupg
+```sh
+sudo apt-get install gnupg
+```
+Create key pair (give desired inputs and wait until key is created)
+```sh
+gpg --gen-key
+```
+To encrypt 
+```
+<CMD TO O/P> | gpg -e -r <RECIPIENT>
+```
+To decrypt
+```
+<CMD TO O/P> | gpg -d
+```
+To get list of keys
+```
+gpg -k
+```
+To get public key
+`... PENDING ...`
+	
+	
+### Downloading entire site with wget
+```sh
+wget \
+ --recursive \
+ --no-clobber \
+ --page-requisites \
+ --html-extension \
+ --convert-links \
+ --restrict-file-names=windows \
+ --domains website.org \
+ --no-parent \
+     www.website.org/tutorials/html/
+```
+
+### Persist iptables configuration
+install iptables-persistent
+```sh
+sudo apt-get install iptables-persistent
+```
+save iptables configuration with iptables-persistent
+```sh
+sudo iptables-persistent save
+```
+
+### Setting iptables to redirect port (could be used to set wildfly to get request from 80 port)
+```sh
+sudo iptables -A PREROUTING -t nat -p tcp --dport 80 -j REDIRECT --to-port 8080
+```
+
+### Setting iptables to redirect port on local machine
+```sh
+sudo iptables -t nat -I OUTPUT -p tcp -o lo --dport 80 -j REDIRECT --to-ports 8080
+```
+
+	
+### Get linux distribution information
+```sh
+lsb_release -a
+cat /etc/*-release
+uname -a
+cat /proc/version
+```
+
+
+### Compress, zip, extract files directory etc
+```sh
+tar -cvzf <filename_with_.tar.gz_extension> <directory_or_file>
+tar -xvzf <filename_with_.tar.gz_extension> 
+tar -cvzf - <file1> <file2> ... <filen>
+```
+
+### Continue last transaction of package manager like apt-get or yum
+```sh
+yum-complete-transaction [--cleanup-only] 
+yum history redo last
+```
+
+
+### View image from command line
+Using caca to view image with characters
+:   ```sh
+    sudo apt-get install caca-utils
+    cacaview <any_image_.jpg>
+    ```
+
+Using fbi which will use framebuffer
+: ```sh
+    sudo apt-get install fbi
+    fbi <any_image_.jpg>
+    ```
+
+### Creating desktop launcher for an application
+vim /home/$HOME/.local/share/applications/`<application_name>`.desktop
+```vi
+[Desktop Entry]
+Version=1.0
+Name=<Application Name>
+Comment=<e.g. Java IDE>
+Type=Application
+Categories=<e.g. Development;IDE;>
+Exec=<application location e.g. /home/${USERNAME}/applications/eclipse/eclipse>
+Terminal=false
+StartupNotify=true
+Icon=<icon location e.g. /home/${USERNAME}/applications/eclipse/icon.xpm>
+Name[en_US]=<Application Name e.g. Eclipse>
+```
+<br>
+<br>
+
+--- 
+# Installations
+
+### Installation scripts to setup environment 
+alpine setup environment
+```sh
+<<<<<<<<<<<<<<<<<<<<<<<<
+```
+
+### Adding new php version in wamp server
+	
+1.	create new folder [path-to-wamp]/bin/php/php.#.#.# and copy files here
+2. 	copy following files from older php
+	1. php.ini
+	2. phpForApache.ini
+	3. wampserver.conf
+3.	Take snapshots of wamp>PHP>PHP Settings and wamp>PHP>PHP Extendsion
+4.	Open wamp>PHP>php.ini and save it as a backup
+5.	Restart wamp , Change wamp>PHP>Version>latest_version
+6.	Use a diff tool to get differences between old php.ini and new one to satisfy all extensions
+
+		
+### Installing LAMPP
+	
+1.	Install apache web server
+    ```sh
+    sudo apt-get install apache2
+    ```
+	/etc/apache2/apache2.conf contains configurations
+	/etc/apache2/ports.conf contains ports configuration
+2. Install PHP
+    ```sh
+    sudo apt-get install php5 libapache2-mod-php5
+    ```
+    directory for lookup is /var/www/html
+3.	Install mysql
+    ```sh
+    sudo apt-get install mysql-server
+    ```
+	add following lines in /etc/apache2/apache2.conf
+	```vi
+	#phpMyAdmin Configuration
+	Include /etc/phpmyadmin/apache.conf
+	```
+4.	In Ubuntu also need to run following commands to make mcrypt recognized in phpmyadmin/install mcrypt right way
+	```sh
+	php5enmod mcrypt
+	```
+
+### Installing LEMP
+1.  Install nginx 
+    ```sh
+    sudo apt-get install nginx
+    ```
+	Edit /etc/nginx/sites-available/default
+	(If /usr/share/nginx/www does not exist, it's probably called html. Make sure you update your configuration appropriately)
+	1. Add index.php to the index line.
+	2. Change the server_name from local host to your domain name or IP address (replace the example.com in the configuration)
+	3. Change the correct lines in "location ~ \.php$ {" section
+	    ```vi
+		server {
+			listen   80;
+	
+			root /usr/share/nginx/www;
+			index index.php index.html index.htm;
+
+			server_name example.com;
+
+			location / {
+					try_files $uri $uri/ /index.html;
+			}
+
+			error_page 404 /404.html;
+
+			error_page 500 502 503 504 /50x.html;
+			location = /50x.html {
+				  root /usr/share/nginx/www;
+			}
+			
+			# pass the PHP scripts to FastCGI server listening on the php-fpm socket
+			location ~ \.php$ {
+					try_files $uri =404;
+					fastcgi_pass unix:/var/run/php5-fpm.sock;
+					fastcgi_index index.php;
+					fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+					include fastcgi_params;
+					
+			}
+		}
+		```
+		
+2.  Install mysql with php-mysql
+	```sh
+    sudo apt-get install mysql-server php5-mysql
+    ```
+	Activate mysql
+	```sh
+	sudo mysql_install_db
+    ```
+	setup script
+	```sh
+	sudo /usr/bin/mysql_secure_installation
+    ```
+	
+3. 	Install PHP
+    ```sh
+	sudo apt-get install php5-fpm
+	```
+	
+	Configure php
+	Edit php.ini file vim /etc/php5/fpm/php.ini
+    ```vi
+    cgi.fix_pathinfo=0
+    ```
+    
+	Edit /etc/php5/fpm/pool.d/www.conf
+	Find the line, `listen = 127.0.0.1:9000`, and change the `127.0.0.1:9000` to `/var/run/php5-fpm.sock`. 
+	```vi
+	listen = /var/run/php5-fpm.sock
+	```
+	Restart php-fpm
+	```sh
+    sudo service php5-fpm restart
+    ```
+    
+4. Create info.php
+    ```sh
+	sudo nano /usr/share/nginx/html/info.php
+	```
+	```vi
+	<?php
+	phpinfo();
+	?>
+	```
+	restart nginx
+	```sh
+	sudo service nginx restart
+	```
+
+	
+### Installing Composer in Linux
+1. Download the installer to the current directory
+2. Verify the installer SHA-384 either by below command or cross checking at https://composer.github.io/pubkeys.html
+	php -r "if (hash('SHA384', file_get_contents('composer-setup.php')) === 'fd26ce67e3b237fffd5e5544b45b0d92c41a4afe3e3f778e942e43ce6be197b9cdc7c251dcde6e2a52297ea269370680') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); }"
+3.	Run the installer
+		php composer-setup.php
+4.	Remove the installer
+		php -r "unlink('composer-setup.php');"
+5.	To install composer Globally move the downloaded file to /usr/local/bin/composer
+		mv composer.phar /usr/local/bin/composer
+
+### Installing Laravel 
+On Windows 
+:   ```sh
+    composer global require "laravel/installer"
+    ```
+On Linux using local composer.phar
+:    ```sh
+	php composer.phar global require "laravel/installer"
+	```
+
+**Plugin to add laravel framework in netbeans**
+*https://github.com/nbphpcouncil/nb-laravel-plugin/releases*
+
+			
+	
+### Installing java manually
+Download .tar.gz file (preferred to be downloaded from oracle's site)
+```sh
+wget  --no-cookies --no-check-certificate --header "Cookie: gpw_e24=http%3A%2F%2Fwww.oracle.com%2F; oraclelicense=accept-securebackup-cookie" <url>
+```
+
+Extract .tar.gz file in /opt directory
+```sh
+tar -zxvf jdk-*u**-linux-****.tar.gz
+```
+Create symbolic link in order to simplify java updates in future
+```sh
+ln -s /opt/jdk1.8.0_144 /opt/java
+```
+Tell system where java and ts executables are intalled.
+```sh
+update-alternatives --install /usr/bin/java java /opt/java/bin/java 100
+update-alternatives --config java
+```
+Create necessary environment variables
+```sh
+sudo vim /etc/profile.d/java.sh
+```
+```bash
+if ! echo ${PATH} | grep -q /opt/java/bin ; then
+	export PATH=/opt/java/bin:${PATH}
+fi      
+if ! echo ${PATH} | grep -q /opt/java/jre/bin ; then
+   export PATH=/opt/java/jre/bin:${PATH}
+fi      
+export JAVA_HOME=/opt/java
+export JRE_HOME=/opt/java/jre
+export CLASSPATH=.:/opt/java/lib/tools.jar:/opt/java/jre/lib/rt.jar
+```
+```sh
+sudo chmod 755 /etc/profile.d/java.sh
+```
+
+
+### Uninstall a package properly on Ubuntu
+```sh
+sudo apt-get purge git; 
+sudo apt-get autoremove;
+```
+now delete related files if exist in your home directory 
+```sh
+rm ~/.gitconfig
+```
+			
+### Installing postgresql debugger
+Edit postgresql.conf file present in  c:\program files\postgresql\9.3\data directory
+Un-comment or add this line:
+```vi
+shared_preload_libraries = '$libdir/plugin_debugger.dll'
+```
+Restart PostgreSQL server
+In the required database run following command 
+```sql
+create extension pldbgapi;
+```
+		
+
+### Maven download / install sources and javadocs
+Download sources
+```sh
+mvn dependency:sources
+```
+Download docs
+```sh
+mvn dependency:resolve -Dclassifier=javadoc
+```
+Download sources of specific package
+```sh
+mvn dependency:sources -DincludeArtifactIds=guava
+```
+Add plugin in pom.xml
+```pom
+<plugin>
+    <groupId>org.apache.maven.plugins</groupId>
+    <artifactId>maven-eclipse-plugin</artifactId>
+    <configuration>
+        <downloadSources>true</downloadSources>
+        <downloadJavadocs>true</downloadJavadocs>
+    </configuration>
+</plugin>
+```
+
+### Maven run a particular class
+Directly from command line
+:   ```
+    mvn exec:java -Dexec.mainClass="com.example.Main"
+    mvn exec:java -Dexec.mainClass="com.example.Main" -Dexec.args="arg0 arg1"
+    ```
+Using plugin
+:   ```pom
+	<plugin>
+	  <groupId>org.codehaus.mojo</groupId>
+	  <artifactId>exec-maven-plugin</artifactId>
+	  <version>1.2.1</version>
+	  <executions>
+		<execution>
+		  <goals>
+			<goal>java</goal>
+		  </goals>
+		</execution>
+	  </executions>
+	  <configuration>
+		<mainClass>com.example.Main</mainClass>
+		<arguments>
+		  <argument>foo</argument>
+		  <argument>bar</argument>
+		</arguments>
+	  </configuration>
+	</plugin>
+	```
+
+
+### Mongodb on Ubuntu-16.0
+*Reference taken from https://www.howtoforge.com/tutorial/install-mongodb-on-ubuntu-16.04*
+Importing key
+```sh
+sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv EA312927
+```
+Create source list file MongoDB
+```sh
+echo "deb http://repo.mongodb.org/apt/ubuntu "$(lsb_release -sc)"/mongodb-org/3.2 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.2.list
+sudo apt-get install mongodb-org
+```
+Create a new mongodb systemd service file in the '/lib/systemd/system' directory.
+```sh
+cd /lib/systemd/system/
+vim mongod.service
+```
+Now update the systemd service with command below:
+```sh
+systemctl daemon-reload
+```
+Start mongodb and add it as service to be started at boot time:
+```sh
+systemctl start mongod
+systemctl enable mongod
+```
+
+*Further to add mongodb in php*
+```sh
+composer require mongodb/mongodb
+```
+
+
+### Generic runnable/executable file/application as service in ubuntu
+Edit /etc/systemd/system/prometheus.service
+```vi	
+[Unit]
+Description=Prometheus Service
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/prometheus/prometheus --config.file=/usr/local/bin/prometheus/prometheus.yml
+
+[Install]
+WantedBy=multi-user.target 
+```
+```sh
+sudo service prometheus start
+```
+<br>
+<br>
+
+---
+# Setup
+		
+### Disabling lightdm (or other service) 
+1. Method 1
+	```sh
+    echo manual | sudo tee etc/init.d/lightdm.override
+    ```
+	i.e. create <service>.override file to disable it (override it)
+	*This method is not working after 14.0*
+
+2. Method 2 
+	edit /etc/default/grub
+	replace 	GRUB_CMDLINE_LINUX_DEFAULT="quiet splash"
+	with		GRUB_CMDLINE_LINUX_DEFAULT="text"
+	```sh
+    sudo update-grub
+    ```
+
+### Disable ssh login without password
+1.  Edit /etc/ssh/sshd_config and change following settings
+    ```vi
+	ChallengeResponseAuthentication no
+	PasswordAuthentication no
+	UsePAM no
+	```
+	```sh
+	sudo /etc/init.d/ssh reload
+	```
+	
+### Setting git to login wihout password + using ssh in git
+Create ssh-key
+```sh
+ssh-keygen
+```
+Copy your .pub file in remote git application from where you want to connect
+Add your private key using ssh-agent into your system (if you don't want to provide key every time)
+```sh
+ssh-add ~/.ssh/id_rsa
+```
+<br>
+<br>
+
+### Adding git with ssh protocol on windows
+Open git-bash 
+```sh
+ssh-keygen
+vim ~/.bashrc
+```
+Enter following lines in editor
+```vi
+eval `ssh-agent`
+ssh-add
+```
+Restart git-bash
+```sh
+rm ~/.bashrc
+```
+Close git-bash
+RSA public key of ssh is present in .ssh directory inside %userprofile% 
+
+
+### Convert openssh private key to pem format
+```sh
+ssh-keygen -p -N "" -m pem -f /path/to/key
+```
+
+### Analyze which service taken how much time during startup or bootup
+```sh
+systemd-analyze blame
+```
+
+### Linux Sending mail from command line
+MSMTP (SMTP client)
+:   >(Documentation could be found at http://msmtp.sourceforge.net/doc/msmtp.html)
+    
+    ```sh
+	sudo apt-get install msmtp
+    vim ~/.msmtprc
+	```
+	Now in opened editor set default values for all following accounts.
+	```vi
+	# Set default values for all following accounts.
+	defaults
+	auth           on
+	tls            on
+	tls_trust_file /etc/ssl/certs/ca-certificates.crt
+	logfile        ~/.msmtp.log
+
+	# Gmail
+	account        gmail
+	host           smtp.gmail.com
+	port           587
+	from           username@gmail.com
+	user           username
+	password       plain-text-password
+
+	# A freemail service
+	account        freemail
+	host           smtp.freemail.example
+	from           joe_smith@freemail.example
+	...
+
+	# Set a default account
+	account default : gmail
+	```
+
+### Linux fetching mail from command line
+fetchmail (remote-mail retrieval and forwarding utility intended to be used over on-demand TCP/IP)
+`... PENDING ...`
+			
+	
+### Adding ssh client in linux
+```sh
+sudo apt-get install openssh-server
+```
+Create a file **~/.ssh/authorized_keys** if not exist
+```sh
+touch ~/.ssh/authorized_keys
+```
+Append your public key in this file
+```sh
+cat rsa_public_key.pub >> ~/.ssh/authorized_keys
+```
+Now you can access this linux from windows by following command
+```sh
+ssh -i rsa_private_key username@ipaddress
+```
+You can use ssh-keygen to create public private rsa key pair
+
+
+
+### Forcefully disconnect an ssh client
+find process id of ssh for client
+```sh
+sudo netstat -tnpa | grep ssh
+```
+kill process
+```sh
+kill -9 <pid>
+```
+
+
+
+### Logging ssh session   `Important`
+Download log-session script
+```sh
+wget http://www.jms1.net/log-session
+```
+Find out where the sftp-server binary is located
+```sh
+grep sftp /etc/ssh/sshd_config
+```
+Edit log-session file and replace following content
+```sh
+SFTP_SERVER=<location_of_sftp_server>
+SFTP_SERVER=/usr/lib/openssh/sftp-server
+```
+Make log-session file executable
+```sh
+chmod 755 log-session
+```
+Edit ~/.ssh/authorized_keys and append following
+```vi
+command="<location_of_log_session>"
+command="/usr/local/sbin/log-session" ssh-dss AAAAB3Nz...
+```
+
+
+### Securing your password with public key encryption
+Securing your password (or anything for the secure transmission of information between parties) with public key encryption
+Install gnupg
+```sh
+sudo apt-get install gnupg
+```
+Create key pair (give desired inputs and wait until key is created)
+```sh
+gpg --gen-key
+```
+To encrypt 
+```
+<CMD TO O/P> | gpg -e -r <RECIPIENT>
+```
+To decrypt
+```
+<CMD TO O/P> | gpg -d
+```
+To get list of keys
+```
+gpg -k
+```
+To get public key
+`... PENDING ...`
+	
+	
+### Downloading entire site with wget
+```sh
+wget \
+ --recursive \
+ --no-clobber \
+ --page-requisites \
+ --html-extension \
+ --convert-links \
+ --restrict-file-names=windows \
+ --domains website.org \
+ --no-parent \
+     www.website.org/tutorials/html/
+```
+
+### Persist iptables configuration
+install iptables-persistent
+```sh
+sudo apt-get install iptables-persistent
+```
+save iptables configuration with iptables-persistent
+```sh
+sudo iptables-persistent save
+```
+
+### Setting iptables to redirect port (could be used to set wildfly to get request from 80 port)
+```sh
+sudo iptables -A PREROUTING -t nat -p tcp --dport 80 -j REDIRECT --to-port 8080
+```
+
+### Setting iptables to redirect port on local machine
+```sh
+sudo iptables -t nat -I OUTPUT -p tcp -o lo --dport 80 -j REDIRECT --to-ports 8080
+```
+
+	
+### Get linux distribution information
+```sh
+lsb_release -a
+cat /etc/*-release
+uname -a
+cat /proc/version
+```
+
+
+### Compress, zip, extract files directory etc
+```sh
+tar -cvzf <filename_with_.tar.gz_extension> <directory_or_file>
+tar -xvzf <filename_with_.tar.gz_extension> 
+tar -cvzf - <file1> <file2> ... <filen>
+```
+
+### Continue last transaction of package manager like apt-get or yum
+```sh
+yum-complete-transaction [--cleanup-only] 
+yum history redo last
+```
+
+
+### View image from command line
+Using caca to view image with characters
+:   ```sh
+    sudo apt-get install caca-utils
+    cacaview <any_image_.jpg>
+    ```
+
+Using fbi which will use framebuffer
+: ```sh
+    sudo apt-get install fbi
+    fbi <any_image_.jpg>
+    ```
+
+### Creating desktop launcher for an application
+vim /home/$HOME/.local/share/applications/`<application_name>`.desktop
+```vi
+[Desktop Entry]
+Version=1.0
+Name=<Application Name>
+Comment=<e.g. Java IDE>
+Type=Application
+Categories=<e.g. Development;IDE;>
+Exec=<application location e.g. /home/${USERNAME}/applications/eclipse/eclipse>
+Terminal=false
+StartupNotify=true
+Icon=<icon location e.g. /home/${USERNAME}/applications/eclipse/icon.xpm>
+Name[en_US]=<Application Name e.g. Eclipse>
+```
+<br>
+<br>
+
+--- 
+# Installations
+
+### Installation scripts to setup environment 
+alpine setup environment
+```sh
+<<<<<<<<<<<<<<<<<<<<<<<<
+```
+
+### Adding new php version in wamp server
+	
+1.	create new folder [path-to-wamp]/bin/php/php.#.#.# and copy files here
+2. 	copy following files from older php
+	1. php.ini
+	2. phpForApache.ini
+	3. wampserver.conf
+3.	Take snapshots of wamp>PHP>PHP Settings and wamp>PHP>PHP Extendsion
+4.	Open wamp>PHP>php.ini and save it as a backup
+5.	Restart wamp , Change wamp>PHP>Version>latest_version
+6.	Use a diff tool to get differences between old php.ini and new one to satisfy all extensions
+
+		
+### Installing LAMPP
+	
+1.	Install apache web server
+    ```sh
+    sudo apt-get install apache2
+    ```
+	/etc/apache2/apache2.conf contains configurations
+	/etc/apache2/ports.conf contains ports configuration
+2. Install PHP
+    ```sh
+    sudo apt-get install php5 libapache2-mod-php5
+    ```
+    directory for lookup is /var/www/html
+3.	Install mysql
+    ```sh
+    sudo apt-get install mysql-server
+    ```
+	add following lines in /etc/apache2/apache2.conf
+	```vi
+	#phpMyAdmin Configuration
+	Include /etc/phpmyadmin/apache.conf
+	```
+4.	In Ubuntu also need to run following commands to make mcrypt recognized in phpmyadmin/install mcrypt right way
+	```sh
+	php5enmod mcrypt
+	```
+
+### Installing LEMP
+1.  Install nginx 
+    ```sh
+    sudo apt-get install nginx
+    ```
+	Edit /etc/nginx/sites-available/default
+	(If /usr/share/nginx/www does not exist, it's probably called html. Make sure you update your configuration appropriately)
+	1. Add index.php to the index line.
+	2. Change the server_name from local host to your domain name or IP address (replace the example.com in the configuration)
+	3. Change the correct lines in "location ~ \.php$ {" section
+	    ```vi
+		server {
+			listen   80;
+	
+			root /usr/share/nginx/www;
+			index index.php index.html index.htm;
+
+			server_name example.com;
+
+			location / {
+					try_files $uri $uri/ /index.html;
+			}
+
+			error_page 404 /404.html;
+
+			error_page 500 502 503 504 /50x.html;
+			location = /50x.html {
+				  root /usr/share/nginx/www;
+			}
+			
+			# pass the PHP scripts to FastCGI server listening on the php-fpm socket
+			location ~ \.php$ {
+					try_files $uri =404;
+					fastcgi_pass unix:/var/run/php5-fpm.sock;
+					fastcgi_index index.php;
+					fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+					include fastcgi_params;
+					
+			}
+		}
+		```
+		
+2.  Install mysql with php-mysql
+	```sh
+    sudo apt-get install mysql-server php5-mysql
+    ```
+	Activate mysql
+	```sh
+	sudo mysql_install_db
+    ```
+	setup script
+	```sh
+	sudo /usr/bin/mysql_secure_installation
+    ```
+	
+3. 	Install PHP
+    ```sh
+	sudo apt-get install php5-fpm
+	```
+	
+	Configure php
+	Edit php.ini file vim /etc/php5/fpm/php.ini
+    ```vi
+    cgi.fix_pathinfo=0
+    ```
+    
+	Edit /etc/php5/fpm/pool.d/www.conf
+	Find the line, `listen = 127.0.0.1:9000`, and change the `127.0.0.1:9000` to `/var/run/php5-fpm.sock`. 
+	```vi
+	listen = /var/run/php5-fpm.sock
+	```
+	Restart php-fpm
+	```sh
+    sudo service php5-fpm restart
+    ```
+    
+4. Create info.php
+    ```sh
+	sudo nano /usr/share/nginx/html/info.php
+	```
+	```vi
+	<?php
+	phpinfo();
+	?>
+	```
+	restart nginx
+	```sh
+	sudo service nginx restart
+	```
+
+	
+### Installing Composer in Linux
+1. Download the installer to the current directory
+2. Verify the installer SHA-384 either by below command or cross checking at https://composer.github.io/pubkeys.html
+	php -r "if (hash('SHA384', file_get_contents('composer-setup.php')) === 'fd26ce67e3b237fffd5e5544b45b0d92c41a4afe3e3f778e942e43ce6be197b9cdc7c251dcde6e2a52297ea269370680') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); }"
+3.	Run the installer
+		php composer-setup.php
+4.	Remove the installer
+		php -r "unlink('composer-setup.php');"
+5.	To install composer Globally move the downloaded file to /usr/local/bin/composer
+		mv composer.phar /usr/local/bin/composer
+
+### Installing Laravel 
+On Windows 
+:   ```sh
+    composer global require "laravel/installer"
+    ```
+On Linux using local composer.phar
+:    ```sh
+	php composer.phar global require "laravel/installer"
+	```
+
+**Plugin to add laravel framework in netbeans**
+*https://github.com/nbphpcouncil/nb-laravel-plugin/releases*
+
+			
+	
+### Installing java manually
+Download .tar.gz file (preferred to be downloaded from oracle's site)
+```sh
+wget  --no-cookies --no-check-certificate --header "Cookie: gpw_e24=http%3A%2F%2Fwww.oracle.com%2F; oraclelicense=accept-securebackup-cookie" <url>
+```
+
+Extract .tar.gz file in /opt directory
+```sh
+tar -zxvf jdk-*u**-linux-****.tar.gz
+```
+Create symbolic link in order to simplify java updates in future
+```sh
+ln -s /opt/jdk1.8.0_144 /opt/java
+```
+Tell system where java and ts executables are intalled.
+```sh
+update-alternatives --install /usr/bin/java java /opt/java/bin/java 100
+update-alternatives --config java
+```
+Create necessary environment variables
+```sh
+sudo vim /etc/profile.d/java.sh
+```
+```bash
+if ! echo ${PATH} | grep -q /opt/java/bin ; then
+	export PATH=/opt/java/bin:${PATH}
+fi      
+if ! echo ${PATH} | grep -q /opt/java/jre/bin ; then
+   export PATH=/opt/java/jre/bin:${PATH}
+fi      
+export JAVA_HOME=/opt/java
+export JRE_HOME=/opt/java/jre
+export CLASSPATH=.:/opt/java/lib/tools.jar:/opt/java/jre/lib/rt.jar
+```
+```sh
+sudo chmod 755 /etc/profile.d/java.sh
+```
+
+
+### Uninstall a package properly on Ubuntu
+```sh
+sudo apt-get purge git; 
+sudo apt-get autoremove;
+```
+now delete related files if exist in your home directory 
+```sh
+rm ~/.gitconfig
+```
+			
+### Installing postgresql debugger
+Edit postgresql.conf file present in  c:\program files\postgresql\9.3\data directory
+Un-comment or add this line:
+```vi
+shared_preload_libraries = '$libdir/plugin_debugger.dll'
+```
+Restart PostgreSQL server
+In the required database run following command 
+```sql
+create extension pldbgapi;
+```
+		
+
+### Maven download / install sources and javadocs
+Download sources
+```sh
+mvn dependency:sources
+```
+Download docs
+```sh
+mvn dependency:resolve -Dclassifier=javadoc
+```
+Download sources of specific package
+```sh
+mvn dependency:sources -DincludeArtifactIds=guava
+```
+Add plugin in pom.xml
+```pom
+<plugin>
+    <groupId>org.apache.maven.plugins</groupId>
+    <artifactId>maven-eclipse-plugin</artifactId>
+    <configuration>
+        <downloadSources>true</downloadSources>
+        <downloadJavadocs>true</downloadJavadocs>
+    </configuration>
+</plugin>
+```
+
+### Maven run a particular class
+Directly from command line
+:   ```
+    mvn exec:java -Dexec.mainClass="com.example.Main"
+    mvn exec:java -Dexec.mainClass="com.example.Main" -Dexec.args="arg0 arg1"
+    ```
+Using plugin
+:   ```pom
+	<plugin>
+	  <groupId>org.codehaus.mojo</groupId>
+	  <artifactId>exec-maven-plugin</artifactId>
+	  <version>1.2.1</version>
+	  <executions>
+		<execution>
+		  <goals>
+			<goal>java</goal>
+		  </goals>
+		</execution>
+	  </executions>
+	  <configuration>
+		<mainClass>com.example.Main</mainClass>
+		<arguments>
+		  <argument>foo</argument>
+		  <argument>bar</argument>
+		</arguments>
+	  </configuration>
+	</plugin>
+	```
+
+
+### Mongodb on Ubuntu-16.0
+*Reference taken from https://www.howtoforge.com/tutorial/install-mongodb-on-ubuntu-16.04*
+Importing key
+```sh
+sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv EA312927
+```
+Create source list file MongoDB
+```sh
+echo "deb http://repo.mongodb.org/apt/ubuntu "$(lsb_release -sc)"/mongodb-org/3.2 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.2.list
+sudo apt-get install mongodb-org
+```
+Create a new mongodb systemd service file in the '/lib/systemd/system' directory.
+```sh
+cd /lib/systemd/system/
+vim mongod.service
+```
+Now update the systemd service with command below:
+```sh
+systemctl daemon-reload
+```
+Start mongodb and add it as service to be started at boot time:
+```sh
+systemctl start mongod
+systemctl enable mongod
+```
+
+*Further to add mongodb in php*
+```sh
+composer require mongodb/mongodb
+```
+
+
+### Generic runnable/executable file/application as service in ubuntu
+Edit /etc/systemd/system/prometheus.service
+```vi	
+[Unit]
+Description=Prometheus Service
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/prometheus/prometheus --config.file=/usr/local/bin/prometheus/prometheus.yml
+
+[Install]
+WantedBy=multi-user.target 
+```
+```sh
+sudo service prometheus start
+```
+<br>
+<br>
+
+---
+# Setup
+		
+### Disabling lightdm (or other service) 
+1. Method 1
+	```sh
+    echo manual | sudo tee etc/init.d/lightdm.override
+    ```
+	i.e. create <service>.override file to disable it (override it)
+	*This method is not working after 14.0*
+
+2. Method 2 
+	edit /etc/default/grub
+	replace 	GRUB_CMDLINE_LINUX_DEFAULT="quiet splash"
+	with		GRUB_CMDLINE_LINUX_DEFAULT="text"
+	```sh
+    sudo update-grub
+    ```
+
+### Disable ssh login without password
+1.  Edit /etc/ssh/sshd_config and change following settings
+    ```vi
+	ChallengeResponseAuthentication no
+	PasswordAuthentication no
+	UsePAM no
+	```
+	```sh
+	sudo /etc/init.d/ssh reload
+	```
+	
+### Setting git to login wihout password + using ssh in git
+Create ssh-key
+```sh
+ssh-keygen
+```
+Copy your .pub file in remote git application from where you want to connect
+Add your private key using ssh-agent into your system (if you don't want to provide key every time)
+```sh
+ssh-add ~/.ssh/id_rsa
+```
+<br>
+<br>
+
+### Adding git with ssh protocol on windows
+Open git-bash 
+```sh
+ssh-keygen
+vim ~/.bashrc
+```
+Enter following lines in editor
+```vi
+eval `ssh-agent`
+ssh-add
+```
+Restart git-bash
+```sh
+rm ~/.bashrc
+```
+Close git-bash
+RSA public key of ssh is present in .ssh directory inside %userprofile% 
+
+
+### Convert openssh private key to pem format
+```sh
+ssh-keygen -p -N "" -m pem -f /path/to/key
+```
+
+### Analyze which service taken how much time during startup or bootup
+```sh
+systemd-analyze blame
+```
+
+### Linux Sending mail from command line
+MSMTP (SMTP client)
+:   >(Documentation could be found at http://msmtp.sourceforge.net/doc/msmtp.html)
+    
+    ```sh
+	sudo apt-get install msmtp
+    vim ~/.msmtprc
+	```
+	Now in opened editor set default values for all following accounts.
+	```vi
+	# Set default values for all following accounts.
+	defaults
+	auth           on
+	tls            on
+	tls_trust_file /etc/ssl/certs/ca-certificates.crt
+	logfile        ~/.msmtp.log
+
+	# Gmail
+	account        gmail
+	host           smtp.gmail.com
+	port           587
+	from           username@gmail.com
+	user           username
+	password       plain-text-password
+
+	# A freemail service
+	account        freemail
+	host           smtp.freemail.example
+	from           joe_smith@freemail.example
+	...
+
+	# Set a default account
+	account default : gmail
+	```
+
+### Linux fetching mail from command line
+fetchmail (remote-mail retrieval and forwarding utility intended to be used over on-demand TCP/IP)
+`... PENDING ...`
+			
+	
+### Adding ssh client in linux
+```sh
+sudo apt-get install openssh-server
+```
+Create a file **~/.ssh/authorized_keys** if not exist
+```sh
+touch ~/.ssh/authorized_keys
+```
+Append your public key in this file
+```sh
+cat rsa_public_key.pub >> ~/.ssh/authorized_keys
+```
+Now you can access this linux from windows by following command
+```sh
+ssh -i rsa_private_key username@ipaddress
+```
+You can use ssh-keygen to create public private rsa key pair
+
+
+
+### Forcefully disconnect an ssh client
+find process id of ssh for client
+```sh
+sudo netstat -tnpa | grep ssh
+```
+kill process
+```sh
+kill -9 <pid>
+```
+
+
+
+### Logging ssh session   `Important`
+Download log-session script
+```sh
+wget http://www.jms1.net/log-session
+```
+Find out where the sftp-server binary is located
+```sh
+grep sftp /etc/ssh/sshd_config
+```
+Edit log-session file and replace following content
+```sh
+SFTP_SERVER=<location_of_sftp_server>
+SFTP_SERVER=/usr/lib/openssh/sftp-server
+```
+Make log-session file executable
+```sh
+chmod 755 log-session
+```
+Edit ~/.ssh/authorized_keys and append following
+```vi
+command="<location_of_log_session>"
+command="/usr/local/sbin/log-session" ssh-dss AAAAB3Nz...
+```
+
+
+### Securing your password with public key encryption
+Securing your password (or anything for the secure transmission of information between parties) with public key encryption
+Install gnupg
+```sh
+sudo apt-get install gnupg
+```
+Create key pair (give desired inputs and wait until key is created)
+```sh
+gpg --gen-key
+```
+To encrypt 
+```
+<CMD TO O/P> | gpg -e -r <RECIPIENT>
+```
+To decrypt
+```
+<CMD TO O/P> | gpg -d
+```
+To get list of keys
+```
+gpg -k
+```
+To get public key
+`... PENDING ...`
+	
+	
+### Downloading entire site with wget
+```sh
+wget \
+ --recursive \
+ --no-clobber \
+ --page-requisites \
+ --html-extension \
+ --convert-links \
+ --restrict-file-names=windows \
+ --domains website.org \
+ --no-parent \
+     www.website.org/tutorials/html/
+```
+
+### Persist iptables configuration
+install iptables-persistent
+```sh
+sudo apt-get install iptables-persistent
+```
+save iptables configuration with iptables-persistent
+```sh
+sudo iptables-persistent save
+```
+
+### Setting iptables to redirect port (could be used to set wildfly to get request from 80 port)
+```sh
+sudo iptables -A PREROUTING -t nat -p tcp --dport 80 -j REDIRECT --to-port 8080
+```
+
+### Setting iptables to redirect port on local machine
+```sh
+sudo iptables -t nat -I OUTPUT -p tcp -o lo --dport 80 -j REDIRECT --to-ports 8080
+```
+
+	
+### Get linux distribution information
+```sh
+lsb_release -a
+cat /etc/*-release
+uname -a
+cat /proc/version
+```
+
+
+### Compress, zip, extract files directory etc
+```sh
+tar -cvzf <filename_with_.tar.gz_extension> <directory_or_file>
+tar -xvzf <filename_with_.tar.gz_extension> 
+tar -cvzf - <file1> <file2> ... <filen>
+```
+
+### Continue last transaction of package manager like apt-get or yum
+```sh
+yum-complete-transaction [--cleanup-only] 
+yum history redo last
+```
+
+
+### View image from command line
+Using caca to view image with characters
+:   ```sh
+    sudo apt-get install caca-utils
+    cacaview <any_image_.jpg>
+    ```
+
+Using fbi which will use framebuffer
+: ```sh
+    sudo apt-get install fbi
+    fbi <any_image_.jpg>
+    ```
+
+### Creating desktop launcher for an application
+vim /home/$HOME/.local/share/applications/`<application_name>`.desktop
+```vi
+[Desktop Entry]
+Version=1.0
+Name=<Application Name>
+Comment=<e.g. Java IDE>
+Type=Application
+Categories=<e.g. Development;IDE;>
+Exec=<application location e.g. /home/${USERNAME}/applications/eclipse/eclipse>
+Terminal=false
+StartupNotify=true
+Icon=<icon location e.g. /home/${USERNAME}/applications/eclipse/icon.xpm>
+Name[en_US]=<Application Name e.g. Eclipse>
+```
+<br>
+<br>
+
+--- 
+# Installations
+
+### Installation scripts to setup environment 
+alpine setup environment
+```sh
+<<<<<<<<<<<<<<<<<<<<<<<<
+```
+
+### Adding new php version in wamp server
+	
+1.	create new folder [path-to-wamp]/bin/php/php.#.#.# and copy files here
+2. 	copy following files from older php
+	1. php.ini
+	2. phpForApache.ini
+	3. wampserver.conf
+3.	Take snapshots of wamp>PHP>PHP Settings and wamp>PHP>PHP Extendsion
+4.	Open wamp>PHP>php.ini and save it as a backup
+5.	Restart wamp , Change wamp>PHP>Version>latest_version
+6.	Use a diff tool to get differences between old php.ini and new one to satisfy all extensions
+
+		
+### Installing LAMPP
+	
+1.	Install apache web server
+    ```sh
+    sudo apt-get install apache2
+    ```
+	/etc/apache2/apache2.conf contains configurations
+	/etc/apache2/ports.conf contains ports configuration
+2. Install PHP
+    ```sh
+    sudo apt-get install php5 libapache2-mod-php5
+    ```
+    directory for lookup is /var/www/html
+3.	Install mysql
+    ```sh
+    sudo apt-get install mysql-server
+    ```
+	add following lines in /etc/apache2/apache2.conf
+	```vi
+	#phpMyAdmin Configuration
+	Include /etc/phpmyadmin/apache.conf
+	```
+4.	In Ubuntu also need to run following commands to make mcrypt recognized in phpmyadmin/install mcrypt right way
+	```sh
+	php5enmod mcrypt
+	```
+
+### Installing LEMP
+1.  Install nginx 
+    ```sh
+    sudo apt-get install nginx
+    ```
+	Edit /etc/nginx/sites-available/default
+	(If /usr/share/nginx/www does not exist, it's probably called html. Make sure you update your configuration appropriately)
+	1. Add index.php to the index line.
+	2. Change the server_name from local host to your domain name or IP address (replace the example.com in the configuration)
+	3. Change the correct lines in "location ~ \.php$ {" section
+	    ```vi
+		server {
+			listen   80;
+	
+			root /usr/share/nginx/www;
+			index index.php index.html index.htm;
+
+			server_name example.com;
+
+			location / {
+					try_files $uri $uri/ /index.html;
+			}
+
+			error_page 404 /404.html;
+
+			error_page 500 502 503 504 /50x.html;
+			location = /50x.html {
+				  root /usr/share/nginx/www;
+			}
+			
+			# pass the PHP scripts to FastCGI server listening on the php-fpm socket
+			location ~ \.php$ {
+					try_files $uri =404;
+					fastcgi_pass unix:/var/run/php5-fpm.sock;
+					fastcgi_index index.php;
+					fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+					include fastcgi_params;
+					
+			}
+		}
+		```
+		
+2.  Install mysql with php-mysql
+	```sh
+    sudo apt-get install mysql-server php5-mysql
+    ```
+	Activate mysql
+	```sh
+	sudo mysql_install_db
+    ```
+	setup script
+	```sh
+	sudo /usr/bin/mysql_secure_installation
+    ```
+	
+3. 	Install PHP
+    ```sh
+	sudo apt-get install php5-fpm
+	```
+	
+	Configure php
+	Edit php.ini file vim /etc/php5/fpm/php.ini
+    ```vi
+    cgi.fix_pathinfo=0
+    ```
+    
+	Edit /etc/php5/fpm/pool.d/www.conf
+	Find the line, `listen = 127.0.0.1:9000`, and change the `127.0.0.1:9000` to `/var/run/php5-fpm.sock`. 
+	```vi
+	listen = /var/run/php5-fpm.sock
+	```
+	Restart php-fpm
+	```sh
+    sudo service php5-fpm restart
+    ```
+    
+4. Create info.php
+    ```sh
+	sudo nano /usr/share/nginx/html/info.php
+	```
+	```vi
+	<?php
+	phpinfo();
+	?>
+	```
+	restart nginx
+	```sh
+	sudo service nginx restart
+	```
+
+	
+### Installing Composer in Linux
+1. Download the installer to the current directory
+Exec=<application location e.g. /home
