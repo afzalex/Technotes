@@ -125,8 +125,8 @@
 
 4. Fix sandbox issues if needed:
    ```bash
-   sudo chown root /opt/cursor/chrome-sandbox
-   sudo chmod 4755 /opt/cursor/chrome-sandbox
+   sudo chown root /opt/cursor/usr/share/cursor/chrome-sandbox
+   sudo chmod 4755 /opt/cursor/usr/share/cursor/chrome-sandbox
    ```
 
 ### Android Development
