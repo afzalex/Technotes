@@ -177,13 +177,21 @@ To make this alias persistent across cmd sessions, you can add the doskey comman
     cat << 'EOF' >> ~/.bashrc
     
     # Launch Chrome with separate profile directories
-    fzchrome() {
-        if [ -z "$1" ]; then
-            echo "Usage: fzchrome <profile-name>"
-            return 1
-        fi
-        google-chrome --user-data-dir="$HOME/.fzchrome/$1"
-    }
+	fzchrome() {
+		local profile_dir="$HOME/.fzchrome"
+
+		if [ -z "$1" ]; then
+			echo "Usage: fzchrome <profile-name>"
+			echo "Available profiles:"
+			if [ -d "$profile_dir" ]; then
+				ls "$profile_dir"
+			else
+				echo "  (No profiles found)"
+			fi
+			return 1
+		fi
+		google-chrome --user-data-dir="$profile_dir/$1"
+	}
     EOF
     ```
 
