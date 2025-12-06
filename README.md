@@ -13,7 +13,7 @@
 # Table of Contents
 
 - [Configurations](#configurations) - System and Service Setup
-  - [Cloudflare Tunnel Setup]() - Setup Cloudflare Tunnel
+  - [Cloudflare Tunnel Setup](#cloudflare-tunnel-setup) - Setup Cloudflare Tunnel
   - [EC2 Web Server](#ec2-user-data-to-add-web-server-with-web-page-on-80-port-number) - Deploy Apache + custom landing page via user-data
   - [Docker Remote API](#enable-docker-remote-api) - Configure Docker daemon for remote management on port 2375
   - [VIM Settings](#configuring-vim-according-to-our-needs) - Productivity-focused VIM configuration (line numbers, indentation, colors)
