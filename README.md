@@ -13,6 +13,7 @@
 # Table of Contents
 
 - [Configurations](#configurations) - System and Service Setup
+  - [Cloudflare Tunnel Setup]() - Setup Cloudflare Tunnel
   - [EC2 Web Server](#ec2-user-data-to-add-web-server-with-web-page-on-80-port-number) - Deploy Apache + custom landing page via user-data
   - [Docker Remote API](#enable-docker-remote-api) - Configure Docker daemon for remote management on port 2375
   - [VIM Settings](#configuring-vim-according-to-our-needs) - Productivity-focused VIM configuration (line numbers, indentation, colors)
@@ -78,6 +79,72 @@
 
 
 # Configurations
+
+
+### Cloudflare Tunnel Setup
+Assumption  
+- Name of the machine : fzryzen  
+- Domain we currently own : afzalex.com  
+- Domain we want to tunnel : fzryzen.afzalex.com  
+
+Let's set the variables to use in following code snippets
+```bash
+export CF_TUNNEL_NAME=fzryzen
+export CF_TARGET_DOMAIN=fzryzen.afzalex.com
+```
+
+
+Prerequisites
+- `afzalex.com` or any other domain is added to Cloudflare
+- Nameservers are pointing to Cloudflare
+
+Install Cloudflared in Server
+```bash
+curl -fsSL https://cloudflare.com/install.sh | sudo bash
+cloudflared --version
+```
+
+Login to Cloudflared from server 
+```bash
+cloudflared tunnel login
+```
+- A browser page opens
+- Login to Cloudflare
+- Select `afzalex.com` or any other domain 
+- Approve
+- This creates credentials in `~/.cloudflared/`
+
+Create tunnel named `fzryzen` and create dns record automatically.  
+*In this example trying to route `fzryzen.afzalex.com` to `fzryzen` machine*
+```bash
+cloudflared tunnel create "${CF_TUNNEL_NAME}"
+cloudflared tunnel route dns "${CF_TUNNEL_NAME}" "${CF_TARGET_DOMAIN}"
+```
+
+Create the Cloudflared config file
+```bash
+export TUNNEL_ID=$(basename ~/.cloudflared/*.json .json)
+cat <<EOF | envsubst | tee /tmp/cloudflared-config.yml
+tunnel: ${TUNNEL_ID}
+credentials-file: /root/.cloudflared/${TUNNEL_ID}.json
+
+ingress:
+  - hostname: $CF_TARGET_DOMAIN
+    service: http://localhost:80
+
+  - service: http_status:404
+EOF
+```
+
+Copy this config into /etc/cloudflared directory and then install cloudflared service
+```bash
+sudo mkdir -p /etc/cloudflared
+sudo cp /tmp/cloudflared-config.yml /etc/cloudflared/config.yml
+sudo cloudflared service install
+sudo systemctl enable cloudflared
+sudo systemctl start cloudflared
+```
+
 
 
 ### EC2 user-data to add web server with web page on 80 port number
