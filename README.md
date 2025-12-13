@@ -93,7 +93,6 @@ export CF_TUNNEL_NAME=fzryzen
 export CF_TARGET_DOMAIN=fzryzen.afzalex.com
 ```
 
-
 Prerequisites
 - `afzalex.com` or any other domain is added to Cloudflare
 - Nameservers are pointing to Cloudflare
@@ -126,17 +125,19 @@ Create the Cloudflared config file
 export TUNNEL_ID=$(basename ~/.cloudflared/*.json .json)
 cat <<EOF | envsubst | tee /tmp/cloudflared-config.yml
 tunnel: ${TUNNEL_ID}
-credentials-file: /root/.cloudflared/${TUNNEL_ID}.json
+credentials-file: ${HOME}/.cloudflared/${TUNNEL_ID}.json
 
 ingress:
-  - hostname: $CF_TARGET_DOMAIN
+  - hostname: ${CF_TARGET_DOMAIN}
     service: http://localhost:80
 
   - service: http_status:404
 EOF
 ```
 
-Copy this config into /etc/cloudflared directory and then install cloudflared service
+**Install service and enable it**  
+
+For unix based systems :   
 ```bash
 sudo mkdir -p /etc/cloudflared
 sudo cp /tmp/cloudflared-config.yml /etc/cloudflared/config.yml
@@ -145,6 +146,36 @@ sudo systemctl enable cloudflared
 sudo systemctl start cloudflared
 ```
 
+For macOS :   
+```bash
+cp /tmp/cloudflared-config.yml ~/cloudflared/config.yml
+sudo cloudflared service install
+```
+
+Critical fix in macOS to run cloudflared tunnel as service
+```bash
+PLIST="$HOME/Library/LaunchAgents/com.cloudflare.cloudflared.plist"
+
+/usr/libexec/PlistBuddy -c "Delete :ProgramArguments" "$PLIST"
+/usr/libexec/PlistBuddy -c "Add :ProgramArguments array" "$PLIST"
+/usr/libexec/PlistBuddy -c "Add :ProgramArguments:0 string /opt/homebrew/bin/cloudflared" "$PLIST"
+/usr/libexec/PlistBuddy -c "Add :ProgramArguments:1 string tunnel" "$PLIST"
+/usr/libexec/PlistBuddy -c "Add :ProgramArguments:2 string run" "$PLIST"
+/usr/libexec/PlistBuddy -c "Add :ProgramArguments:3 string fzmacair" "$PLIST"
+
+plutil -lint "$PLIST"
+
+UID=$(id -u)
+launchctl bootout  "gui/$UID" "$PLIST" 2>/dev/null
+launchctl bootstrap "gui/$UID" "$PLIST"
+launchctl kickstart -k "gui/$UID/com.cloudflare.cloudflared"
+```
+
+
+To check if it is routing from internet
+```bash
+cloudflared tunnel info fzmacair
+```
 
 
 ### EC2 user-data to add web server with web page on 80 port number
