@@ -21,6 +21,7 @@
   - [Chrome Command](#adding-personalized-fzchrome-google-chrome-command) - Manage multiple Chrome profiles via command line (fzchrome)
   - [Git Log Tree](#adding-flog-alias-to-view-commit-tree-of-git-in-cui-shellconsole) - Beautiful Git history visualization (flog)
   - [Rsync Backup](#setting-up-rsync-to-backup-data) - Automated daily backups with logging
+  - [macOS auto sync from server](#macos-auto-sync-from-server-to-macbook) - LaunchAgent + rsync pull to MacBook
   - [Network Config](#setting-static-ip-in-local-network) - Configure permanent IP addresses
   - [VirtualBox Network](#making-virtualbox-ip-permanent) - Static IP configuration for VirtualBox VMs
   - [Linux Boot](#setting-linux-to-bootup-with-multicores) - Enable multicore support during boot
@@ -354,6 +355,90 @@ Enter below code opened window
 Above command will sync **/home/afzal** into **/var/backups/afzal/Mon** where "Mon" value could be "Tue", "Wed", ..., "Sun" and output will be logged in **/var/log/backup.log**
 
 Mind giving required previleges to files and directories used in this process
+
+### macOS auto sync from server to MacBook
+Steps to set up automatic sync on a MacBook so data is pulled from the server on a schedule (rsync over SSH). Requires passwordless SSH to the server (key-based login) so `launchd` can run unattended.
+
+Install `flock` (used so overlapping runs do not stack):
+
+```bash
+brew install flock
+```
+
+Create `~/sync_from_server.sh` (replace `<SERVER_IP>` with the server address):
+
+```bash
+#!/bin/bash
+
+LOCK_FILE="/tmp/rsync_from_server.lock"
+LOG_FILE="/tmp/rsync.log"
+
+(
+  flock -n 200 || {
+    echo "$(date) - Another rsync is already running" >> "$LOG_FILE"
+    exit 0
+  }
+
+  echo "$(date) - Starting rsync" >> "$LOG_FILE"
+
+  rsync -av --delete --partial \
+  -e ssh \
+  afzal@<SERVER_IP>:/mnt/hdd/fzdocker/backed/ \
+  /Users/afzal/Pictures/fzdocker-backup-from-fzpi/ >> "$LOG_FILE" 2>&1
+
+  echo "$(date) - Finished rsync" >> "$LOG_FILE"
+
+) 200>"$LOCK_FILE"
+```
+
+Make it executable:
+
+```bash
+chmod +x ~/sync_from_server.sh
+```
+
+If `launchd` does not find `flock`, `rsync`, or `ssh`, use full paths (e.g. `$(brew --prefix)/bin/flock`) or set `PATH` in the plist below via `EnvironmentVariables`.
+
+Create `~/Library/LaunchAgents/com.afzal.rsync.plist`:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+ "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+
+    <key>Label</key>
+    <string>com.afzal.rsync</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/Users/afzal/sync_from_server.sh</string>
+    </array>
+
+    <key>RunAtLoad</key>
+    <true/>
+
+    <key>StartInterval</key>
+    <integer>300</integer> <!-- every 5 minutes -->
+
+    <key>StandardOutPath</key>
+    <string>/tmp/rsync.launch.log</string>
+
+    <key>StandardErrorPath</key>
+    <string>/tmp/rsync.launch.err</string>
+
+</dict>
+</plist>
+```
+
+Load the agent (or reload after edits):
+
+```bash
+launchctl load ~/Library/LaunchAgents/com.afzal.rsync.plist
+```
+
+Logs: append-style rsync output in `/tmp/rsync.log`; LaunchAgent stdout/stderr in `/tmp/rsync.launch.log` and `/tmp/rsync.launch.err`.
 
 ### Setting static ip in local network
 Check network devices attached
